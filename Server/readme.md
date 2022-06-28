@@ -1,8 +1,21 @@
 # Instrumentation Server
-This will be a simple backend written with Express JS and Socket.io. It will facilitate communication between microcontollers, web clients, and a database. To do so, the server will receive information aggregated by the ESP 32 through one end of a bidirectional websocket. It will relay this information to any web clients through another websocket, as well as logging it for storage in the database. Clients may examine the device state and request changes, such as turning a pump on/off. These changes will be relayed back through the websockets to signal the ESP 32 to update the state accordingly. 
+This will be a simple backend written with express JS and socket.io. It will facilitate the communication between micro controllers, web clients, and a database. To do so, it will:
+	- Receive information aggregated by the micro-controller through a web-socket
+	- Process this data and serve it to any web clients
+		- Create graphs / visualizations for data
+	- Log data for storage
+	- Receive client requests to update the state of the device
+		- Control pumps
 
 ![Server Diagram](server-diagram.png "Server Diagram")
+For more information regarding the micro-controller or web client, please visit the respective sections of the repository.
 
-In the future, the backend's implementation may grow to support more powerful features, especially regarding data analysis.
 
 ## API Endpoints:
+# "/"
+Serves index.html. Currently a dev page, will be replaced once the client app is developed.
+
+# SOCKET.IO - "brew-update"
+Microcontroller -> Server
+Provides an update containing
+
