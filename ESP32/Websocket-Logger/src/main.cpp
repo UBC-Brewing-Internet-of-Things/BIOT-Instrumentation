@@ -79,7 +79,7 @@ void setup() {
 void loop() {
   io.loop(); // handle socketIO events
 
-  // send "hello" message to server
+  // send "hello" message to server --- testing
   DynamicJsonDocument doc(1024);
   JsonArray array = doc.to<JsonArray>();
   array.add("hello");
@@ -88,5 +88,4 @@ void loop() {
   serializeJson(doc, message);
 
   io.sendEVENT(message); // send message to server
-
 }

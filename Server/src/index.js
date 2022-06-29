@@ -4,7 +4,7 @@
 
 
 // ---------- IMPORT + INIT -----------
-const port = 3000;
+const port = 3001;
 
 // Importing modules
 const express = require("express");
@@ -12,16 +12,20 @@ const { Server } = require("socket.io");
 
 // Creating the express instance and initalizing the server. passing the instance of the server to socket.io
 const app = express();
-const server = app.listen(port);
-const io = new Server(server); // Creating the socket.io instance
+const server = app.listen(port , () => console.log(`Listening on port ${port}`));
+const io = new Server(server, {
+	cors: {
+		origin: "*",
+	}
+}); // Creating the socket.io instance
 
 // ---------- EXPRESS ROUTES ----------
 // Routes for the express server.
 // Upon loading, the server will load the index.html file. Inside the index.html file, 
 // the io() function is called on the client side to create a socket.io instance. the io() method exposes an io global object that, by default, connects to the host serving the page
-app.get("/", (req, res) => {
-	res.sendFile(__dirname + '/index.html');
-});
+// app.get("/", (req, res) => {
+	
+// });
 
 // ---------- SOCKET.IO ROUTES ----------
 io.on("connection", (socket) => {
@@ -43,7 +47,16 @@ io.on("connection", (socket) => {
 
 		// The server then sends a "client-update" event to the client.
 		// The client receives a data object with the same properties.
-		socket.emit("client-update", data);
+		io.emit("client-update", data);
+	});
+
+	// the server is listening for a "message" event from the client.
+	// the server receives a data object with the following properties:
+	//  - message: (string) the message sent by the client
+	socket.on("chat-message", (data) => {
+		console.log(data);
+		// the server then broadcasts this message to all listeners...
+		io.sockets.emit("broadcast-chat", data);
 	});
 
 });
