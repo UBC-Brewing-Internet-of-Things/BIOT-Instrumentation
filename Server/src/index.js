@@ -19,6 +19,7 @@ const io = new Server(server, {
 	}
 }); // Creating the socket.io instance
 
+
 // ---------- EXPRESS ROUTES ----------
 // Routes for the express server.
 // Upon loading, the server will load the index.html file. Inside the index.html file, 
