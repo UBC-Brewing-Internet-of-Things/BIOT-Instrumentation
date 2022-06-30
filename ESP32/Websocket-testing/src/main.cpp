@@ -2,18 +2,19 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
-#include <ArduinoJson.h>
 #include <String.h>
+#include <ArduinoJson.h>
+#include <WiFiClientSecure.h>
+#include <WiFiMulti.h>
+#include <WebSocketsClient.h> // using v2.3.4 ( ^ versions are not working )
+#include <SocketIOclient.h>
 
-#include <WebSocketsClient_Generic.h>
-#include <SocketIOClient_Generic.h>
-
-#include <credentials.h> // provides ssid and pass for WiFi (in gitignore file)
+#include "credentials.h" // provides ssid and pass for WiFi (in gitignore file)
 
 // --------- GLOBALS ----------
 SocketIOclient io;
 
-String server_ip = "http://localhost:3000";
+String server_ip = "http://10.0.0.216:3001";
 int server_port = 3000;
 
 
