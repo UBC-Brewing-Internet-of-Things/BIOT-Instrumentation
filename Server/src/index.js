@@ -37,22 +37,23 @@ io.on("connection", (socket) => {
 	});
 
 	// The server is listening for a "brew-update" event from the ESP-32 client.
-	// The server receives a data object with the following properties:
+	// The server receives a JSON string that represents an object with the following properties:
 	//  - pH: (float) the current pH value
 	//  - temp: (float) the current temperature value
 	//  - o2: (float) the current dissolved oxygen level
 	//  - pump: (boolean) whether the pump is on or off
 	//
-	socket.on("brew-update", (data) => {
+	socket.on("brew-update", (data_in) => {
+		var data = JSON.parse(data_in)
 		console.log(data.pH, data.temp, data.o2, data.pump);
 
 		// The server then sends a "client-update" event to the client.
-		// The client receives a data object with the same properties.
-		io.emit("client-update", data);
+		// The client receives a JSON string with the same properties.
+		io.emit("client-update", data_in);
 	});
 
 	// the server is listening for a "message" event from the client.
-	// the server receives a data object with the following properties:
+	// the server receives a JSON string that represents an object with the following properties:
 	//  - message: (string) the message sent by the client
 	socket.on("chat-message", (data) => {
 		console.log(data);

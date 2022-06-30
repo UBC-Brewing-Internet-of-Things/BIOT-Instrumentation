@@ -29,7 +29,7 @@ function Chat(){
 			socket.off('broadcast-chat', handleMessageReceived);
 		}
 
-	}, [socket, handleMessageReceived]);
+	}, []);
 
 	// handle the message submission event
 	function handleSubmit(event){
