@@ -1,8 +1,8 @@
 // Main Class for the ESP32 Devices
 // On event from web socket server, call the callback function to update the device state
 // On event from data reader, convert the data to JSON and send it to the web socket server
-#include "./esp_socket/esp_socket.hpp"
-#include "./DataReader.hpp"
+#include "esp_WebSocket.hpp"
+#include "DataReader.hpp"
 
 class DataDevice {
 	public:
@@ -13,5 +13,6 @@ class DataDevice {
 
 	private:
 	esp_WebSocket * ws;
-	esp_DataReader * dr;
+	//esp_DataReader * dr;
+
 };

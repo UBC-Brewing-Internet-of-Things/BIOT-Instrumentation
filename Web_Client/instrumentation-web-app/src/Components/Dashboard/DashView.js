@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import SocketContext from "../../SocketContext.js";
+import { SocketContext } from "../../socket-context.js";
 
 function DashView(props) {
 

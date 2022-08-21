@@ -1,5 +1,5 @@
 import React, { useContext , useEffect , useCallback} from 'react';
-import { SocketContext } from './socket-context';
+import { SocketContext } from '../socket-context';
 
 
 // ---------- CHAT COMPONENT ----------

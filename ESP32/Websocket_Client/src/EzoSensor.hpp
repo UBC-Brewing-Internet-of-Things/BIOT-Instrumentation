@@ -4,10 +4,10 @@
 
 class EzoSensor {
 	public:
-	EzoSensor(uint8_t address, char * name);
+	EzoSensor(int address, char * name);
 	~EzoSensor();
 
 	private:
-	unit8_t address;
+	int address;
 	char * name;
-}
+};

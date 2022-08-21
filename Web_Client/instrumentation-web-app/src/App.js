@@ -1,5 +1,5 @@
-import react from "React";
-import Chat from "Chat.js"
+import react from "react";
+import Chat from "./Components/Chat.js";
 import Dashboard from "./Components/Dashboard/Dashboard.js";
 
 // App is the entry point to the application. This functional class will handle the logic of
@@ -10,7 +10,8 @@ function App() {
     return (
         
             <div classname="main-container">
-                <Dashboard />
+                <Chat />
+				<Dashboard />
             </div>
 
     )

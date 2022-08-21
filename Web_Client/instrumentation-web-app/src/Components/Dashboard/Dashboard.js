@@ -1,5 +1,5 @@
-import react, { useContext, useEffect, useState, useCallback } from "React";
-import SocketContext from "../../SocketContext.js";
+import React, { useContext, useEffect, useState, useCallback } from "react";
+import { SocketContext } from "../../socket-context";
 import DashView from "./DashView.js";
 
 // Dashboard container
