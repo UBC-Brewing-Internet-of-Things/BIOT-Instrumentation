@@ -4,7 +4,7 @@
 
 
 // ---------- IMPORT + INIT -----------
-const port = 3001;
+const port = process.env.PORT || 3001;
 
 // Importing modules
 const express = require("express");
@@ -12,7 +12,7 @@ const { Server } = require("socket.io");
 
 // Creating the express instance and initalizing the server. passing the instance of the server to socket.io
 const app = express();
-const server = app.listen(port , () => console.log(`Listening on port ${port}`));
+const server = app.listen(port, () => console.log(`Listening on port ${port}`));
 const io = new Server(server, {
 	cors: {
 		origin: "*",

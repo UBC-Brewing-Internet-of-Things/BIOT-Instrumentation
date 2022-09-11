@@ -30,9 +30,13 @@ void esp_WebSocket::WebSocket_init() {
 		return;
 	};
 	ESP_LOGI(TAG,"Websocket client initialized");
-	int timeout = 0;
+	int timeout = 0; 
 	while (esp_websocket_client_is_connected(ws_handle) == 0 && timeout < 1000) {
-	    esp_websocket_client_start(ws_handle);
+	    esp_err_t err = esp_websocket_client_start(ws_handle);
+	    if (err == ESP_OK) {
+	        ESP_LOGI(TAG, "Websocket client started");
+	        break;
+	    }
 		timeout++;
 	};
 	if (esp_websocket_client_is_connected(ws_handle) == 0) {
