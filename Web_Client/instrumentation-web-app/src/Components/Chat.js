@@ -22,20 +22,20 @@ function Chat(){
 	// useEffect is used to subscribe to the message received event once the component is mounted.
 	useEffect(() => {
 		// once component is mounted, listen for messages
-		socket.on('broadcast-chat', handleMessageReceived);
+		socket.addEventListener('broadcast-chat', handleMessageReceived);
 
 		return () => {
 			// when component is unmounted, stop listening for messages
-			socket.off('broadcast-chat', handleMessageReceived);
+			socket.removeEventListener('broadcast-chat', handleMessageReceived);
 		}
 
-	}, []);
+	}, [socket, handleMessageReceived]);
 
 	// handle the message submission event
 	function handleSubmit(event){
 		event.preventDefault();
 		const message = event.target.message.value;
-		socket.emit('chat-message', message); // send the message to the server
+		socket.send('chat-message', message); // send the message to the server
 	}
 
 	return (

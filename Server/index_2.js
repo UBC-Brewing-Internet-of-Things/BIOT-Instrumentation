@@ -15,10 +15,7 @@ ws_server.on("connection", socket => {
 	socket.on('pong', heartbeat);
 
 	socket.on("message", message => { 
-		console.log(message.toString());
-		this.clients.forEach(client => {
-			client.send('broadcast-chat',message);
-		});
+		console.log(message);
 	});
 	socket.on("close", () => {
 		console.log("client disconnected");
@@ -26,12 +23,11 @@ ws_server.on("connection", socket => {
 
 	socket.on('chat-message', message => {
 		console.log(message);
-		clients = ws_server.clients;
-		if (clients !== undefined) {
-			clients.forEach(client => {
+		this.clients.forEach(client => {
+			if (client.readyState === ws.OPEN) {
 				client.send(message);
-			});
-		}
+			}
+		});
 	});
 });
 
@@ -39,8 +35,8 @@ ws_server.on("connection", socket => {
 const server = app.listen(process.env.port || 3001);
 // When a client makes a http:// upgrade request to the express server,
 //  we use the ws_server object to handle the upgrade to the ws:// 
-server.on('upgrade', (request, socket_obj, head) => {
-	ws_server.handleUpgrade(request, socket_obj, head, socket => {
+server.on('upgrade', (request, socket, head) => {
+	ws_server.handleUpgrade(request, socket, head, socket => {
 		ws_server.emit('connection', socket, request);
 	});
 });
