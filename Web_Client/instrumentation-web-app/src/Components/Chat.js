@@ -1,6 +1,6 @@
 import React, { useContext , useEffect , useCallback} from 'react';
 import { SocketContext } from '../socket-context';
-
+import { MessageParser, registerCallback } from '../MessageParser.js';
 
 // ---------- CHAT COMPONENT ----------
 // This is a simple chat component to demonstrate the use of the socket context.
@@ -15,18 +15,38 @@ function Chat(){
 	// callback for message received
 	// useCallback is used to avoid re-rendering the component when the callback is called.
 	const handleMessageReceived = useCallback((message) => {
-		console.log(message);
-		document.getElementById('messages').innerHTML += `<li>${message}</li>`;
+		document.getElementById('messages').innerHTML += `<li>${message.message}</li>`;
 	}, []);
 	
+	// handle register here... move to separate component later w/ dashboard
+	function handleRegister(message_json) {
+		console.log(message_json);
+		console.log("registering...");
+		if (message_json.event === "register") {
+			// this.device_id = message.id;
+			const response = JSON.stringify({
+				event : "register_web_client",
+				id: message_json.id,
+				name: "example client", // accounts??
+				type: "Web Client" 
+			})
+			socket.send(response);
+		}
+	}
+
+
 	// useEffect is used to subscribe to the message received event once the component is mounted.
 	useEffect(() => {
 		// once component is mounted, listen for messages
-		socket.addEventListener('broadcast-chat', handleMessageReceived);
+		registerCallback('register', handleRegister);
+		registerCallback('broadcast_chat', handleMessageReceived);
+		socket.addEventListener('message', MessageParser);
+		// register the callback for the 'broadcast_chat' event
+		
 
 		return () => {
 			// when component is unmounted, stop listening for messages
-			socket.removeEventListener('broadcast-chat', handleMessageReceived);
+			socket.removeEventListener('message', handleMessageReceived);
 		}
 
 	}, [socket, handleMessageReceived]);
@@ -35,8 +55,13 @@ function Chat(){
 	function handleSubmit(event){
 		event.preventDefault();
 		const message = event.target.message.value;
-		socket.send('chat-message', message); // send the message to the server
+		const message_json = JSON.stringify({
+			event: 'chat_message',
+			message: message
+		});
+		socket.send(message_json); // send the message to the server
 	}
+
 
 	return (
 		<div className="chat">

@@ -6,13 +6,20 @@
 
 class DataDevice {
 	public:
-	DataDevice(char * url, char * endpoint);
-	DataDevice(char * url, char * endpoint, int port);
+	DataDevice(char * url, char * endpoint, char * name);
+	DataDevice(char * url, char * endpoint, int port, char * name);
 	~DataDevice();
 	void readAndSendData();
+	void setId(char * id);
+	void getId();
+	void setName(char * name);
+	void getName();
+	
 
 	private:
 	esp_WebSocket * ws;
+	char * id;
+	char * name;
 	//esp_DataReader * dr;
 
 };

@@ -1,0 +1,9 @@
+{
+	"files.associations": {
+		"istream": "cpp",
+		"*.ipp": "cpp",
+		"system_error": "cpp",
+		"cstdio": "cpp",
+		"*.tcc": "cpp"
+	}
+}
