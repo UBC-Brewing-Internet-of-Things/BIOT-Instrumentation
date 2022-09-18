@@ -14,7 +14,7 @@ class esp_WebSocket {
 		void Websocket_Stop();
 
 	private:
-		void WebSocket_init();
+		int WebSocket_init();
 		esp_websocket_client_config_t ws_config;
 		esp_websocket_client_handle_t ws_handle;
 		void * parentDevice; // can we reference DataDevice class here? creates an infinite loop...

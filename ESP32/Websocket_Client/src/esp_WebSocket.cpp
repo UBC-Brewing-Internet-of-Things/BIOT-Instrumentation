@@ -7,11 +7,11 @@
 #include <string>
 #include <ArduinoJson.h>
 
+#define TIMEOUT 10000
+
 esp_WebSocket * ws_callback_reference;
 
-
 static const char* TAG = "WebSocket";
-
 
 // Simple send method that sends a message to the websocket server
 int esp_WebSocket::WebSocket_send(char * message) {
@@ -104,12 +104,13 @@ void esp_WebSocket::Websocket_Stop() {
 
 esp_WebSocket::esp_WebSocket(char * url, char * endpoint, void * parentDevice) {
 	std::string uri_str = "ws://" + std::string(url) + "/" + std::string(endpoint);
-	ws_config = {
-		.uri = uri_str.c_str(),
-	};
+	ws_config.uri = uri_str.c_str();
 	ws_callback_reference = this;
 	this->parentDevice = parentDevice;
-	esp_WebSocket::WebSocket_init();
+	while (WebSocket_init() != 0) {
+		ESP_LOGI(TAG, "Attempting websocket init again");
+		vTaskDelay(1000 / portTICK_PERIOD_MS);
+	}
 	esp_websocket_register_events(ws_handle, WEBSOCKET_EVENT_ANY, (esp_event_handler_t) Websocket_Event_Handler, (void*)ws_handle);
 };
 
@@ -118,19 +119,25 @@ esp_WebSocket::esp_WebSocket(char * url, char * endpoint, int port, void * paren
 	ws_config.uri = uri_str.c_str();
 	ws_config.port = port;
 	this->parentDevice = parentDevice;
-	esp_WebSocket::WebSocket_init();
+	while (WebSocket_init() != 0) {
+		ESP_LOGI(TAG, "Attempting websocket init again");
+		vTaskDelay(1000 / portTICK_PERIOD_MS);
+	}
 	esp_websocket_register_events(ws_handle, WEBSOCKET_EVENT_ANY, (esp_event_handler_t) Websocket_Event_Handler, (void*)ws_handle);
 };
 
-void esp_WebSocket::WebSocket_init() {
+
+// Initialize the websocket connection
+// returns 1 if there was an error, 0 if there was no error
+int esp_WebSocket::WebSocket_init() {
 	ws_handle = esp_websocket_client_init(&ws_config);
 	if (ws_handle == NULL) {
 		ESP_LOGI(TAG, "Websocket init failed");
-		return;
+		return 1;
 	};
 	ESP_LOGI(TAG,"Websocket client initialized");
 	int timeout = 0; 
-	while (esp_websocket_client_is_connected(ws_handle) == 0 && timeout < 1000) {
+	while (esp_websocket_client_is_connected(ws_handle) == 0 && timeout < TIMEOUT) {
 	    esp_err_t err = esp_websocket_client_start(ws_handle);
 	    if (err == ESP_OK) {
 	        ESP_LOGI(TAG, "Websocket client started");
@@ -140,9 +147,10 @@ void esp_WebSocket::WebSocket_init() {
 	};
 	if (esp_websocket_client_is_connected(ws_handle) == 0) {
 		ESP_LOGI(TAG, "Websocket connection failed");
-		return;
+		return 1;
 	}
 	ESP_LOGI(TAG,"Websocket connected");
+	return 0;
 }
 
 
