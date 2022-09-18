@@ -6,8 +6,7 @@ class EzoSensor {
 	public:
 	EzoSensor(int address, char * name);
 	~EzoSensor();
-
-	private:
 	int address;
 	char * name;
+	
 };

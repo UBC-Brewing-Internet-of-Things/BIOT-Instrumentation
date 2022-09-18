@@ -31,7 +31,7 @@ esp_DataReader::esp_DataReader() {
 // TODO: add error handling
 void esp_DataReader::readData(char ** response_buf) {
 	// array of bytes to hold the sensor data
-	std::byte * data = new std::byte[this->numSensors * 2];
+	unsigned char * data = new unsigned char[this->numSensors];
 	for (int i = 0; i < this->numSensors; i++) {
 		// create a cmd link to the I2C bus
 		i2c_cmd_handle_t cmd = i2c_cmd_link_create();
@@ -56,13 +56,14 @@ void esp_DataReader::readData(char ** response_buf) {
 	}
 
 	// convert the data to JSON and store as a string in buffer
-	convertDataToJSON(data, response_buf);
+	// TODO: device id...
+	prepareWSJSON(data, response_buf, "1234");
 
 }
 
 // convert data to JSON and store as a string in buffer
-void convertDataToJSON(std::byte * data, char ** response_buf) {
-	sprintf(response_buf, "{\"event\" : \"data_update\",\"%d\" : \"device_id\",\"data\" : {\"ph\" : %d,\"temp\" : %d,\"O2\" : %d}}", device_id, data[1], data[3], data[5]);
+void esp_DataReader::prepareWSJSON(unsigned char * data, char ** response_buf, char * device_id) {
+	sprintf(*response_buf, "{\"event\" : \"data_update\",\"device_id\" : \"%s\",\"data\" : {\"ph\" : %d,\"temp\" : %d,\"O2\" : %d}}", device_id, data[1], data[3], data[5]);
 }
 
 

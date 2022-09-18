@@ -30,7 +30,9 @@ void app_main() {
     wifi_init_sta();
 
 	// Init Data Device
-	DataDevice * dataDevice = new DataDevice(url, endpoint);
+	DataDevice * dataDevice = new DataDevice(url, endpoint, "test device");
+
+
 
 	while (1) {
 		dataDevice->readAndSendData();

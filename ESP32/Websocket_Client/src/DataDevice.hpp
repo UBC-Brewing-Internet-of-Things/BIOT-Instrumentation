@@ -11,9 +11,9 @@ class DataDevice {
 	~DataDevice();
 	void readAndSendData();
 	void setId(char * id);
-	void getId();
+	char * getId();
 	void setName(char * name);
-	void getName();
+	char * getName();
 	
 
 	private:

@@ -23,7 +23,7 @@ class esp_DataReader {
 	EzoSensor * ph;
 	EzoSensor * temp;
 	EzoSensor * O2;
-	char * convertDataToJSON(std::byte * data, char ** json);
+	void prepareWSJSON(unsigned char * data, char ** response_buf, char * device_id);
 
 };
 

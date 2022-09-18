@@ -2,13 +2,13 @@
 
 // Data Device class constructors
 DataDevice::DataDevice(char * url, char * endpoint, char * name) {
-	ws = new esp_WebSocket(url, endpoint, this);
+	ws = new esp_WebSocket(url, endpoint, (void *) this);
 	this->name = name;
 	// dr = new esp_DataReader();
 }
 
 DataDevice::DataDevice(char * url, char * endpoint, int port, char * name) {
-	ws = new esp_WebSocket(url, endpoint, port, this);
+	ws = new esp_WebSocket(url, endpoint, port, (void *) this);
 	this->name = name;
 	//dr = new esp_DataReader();
 }
@@ -30,7 +30,7 @@ void DataDevice::setId(char * id) {
 	this->id = id;
 }
 
-void DataDevice::getId() {
+char * DataDevice::getId() {
 	return this->id;
 }
 
@@ -38,7 +38,7 @@ void DataDevice::setName(char * name) {
 	this->name = name;
 }
 
-void DataDevice::getName() {
+char * DataDevice::getName() {
 	return this->name;
 }
 
