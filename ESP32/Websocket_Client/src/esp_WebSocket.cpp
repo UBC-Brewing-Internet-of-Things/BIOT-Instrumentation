@@ -111,7 +111,13 @@ esp_WebSocket::esp_WebSocket(char * url, char * endpoint, void * parentDevice) {
 		ESP_LOGI(TAG, "Attempting websocket init again");
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
-	esp_websocket_register_events(ws_handle, WEBSOCKET_EVENT_ANY, (esp_event_handler_t) Websocket_Event_Handler, (void*)ws_handle);
+
+	// Register the websocket event handler
+	// error checking prob not needed
+	esp_err_t error = esp_websocket_register_events(ws_handle, WEBSOCKET_EVENT_ANY, (esp_event_handler_t) Websocket_Event_Handler, (void*)ws_handle);
+	if (error != ESP_OK) {
+		ESP_LOGI(TAG, "Error registering websocket events");
+	}
 };
 
 esp_WebSocket::esp_WebSocket(char * url, char * endpoint, int port, void * parentDevice) {
@@ -123,7 +129,12 @@ esp_WebSocket::esp_WebSocket(char * url, char * endpoint, int port, void * paren
 		ESP_LOGI(TAG, "Attempting websocket init again");
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
-	esp_websocket_register_events(ws_handle, WEBSOCKET_EVENT_ANY, (esp_event_handler_t) Websocket_Event_Handler, (void*)ws_handle);
+
+	// error checking prob not needed
+	esp_err_t error = esp_websocket_register_events(ws_handle, WEBSOCKET_EVENT_ANY, (esp_event_handler_t) Websocket_Event_Handler, (void*)ws_handle);
+	if (error != ESP_OK) {
+		ESP_LOGI(TAG, "Error registering events");
+	}
 };
 
 

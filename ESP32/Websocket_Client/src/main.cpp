@@ -35,7 +35,7 @@ void app_main() {
 
 
 	while (1) {
-		dataDevice->readAndSendData();
+		// dataDevice->readAndSendData();
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 

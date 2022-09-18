@@ -104,6 +104,12 @@ server.on('upgrade', (request, socket_obj, head) => {
 	});
 });
 
+// when visiting the root of the server, display a list of the devices
+app.get('/', function (req, res) {
+	res.send(device_manager.getDeviceList());
+});
+
+
 // a heartbeat function to keep the connection alive
 // this function and the ping function are based on examples from the ws library docs
 function heartbeat() {
