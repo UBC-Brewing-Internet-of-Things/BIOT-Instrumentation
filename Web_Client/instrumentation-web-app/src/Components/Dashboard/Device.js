@@ -1,6 +1,7 @@
+import { style } from "@mui/system";
 import React from "react";
 import { SocketContext } from "../../socket-context.js";
-
+import DataWidget from "../DataWidget.js";
 
 // Data Device component
 // - Renders a device
@@ -14,19 +15,62 @@ function Device(props) {
 	const name = props.name;
 	const id = props.id;
 	var data = props.data;
-	console.log(data);
 	
 	return (
-		<div className="device">
-			<h2>{name}</h2>
-			<p>{id}</p>
-
-			<p>ph = {data.pH ? data.pH.value : ""}</p>
-			<p>temp = {data.temp ? data.temperature.value : ""}</p>	
-			<p>disolved o2 = {data.dissolved_o2 ? data.dissolved_o2.value : ""}</p>
+		<div className="device" style={style_object.device}>
+			<div className="device_details" style ={style_object.device_details}>
+				<p className="data_title" style={style_object.data_title}>{name}</p>
+				<p className="data_id" style={style_object.data_id}>id:{id}</p>
+			</div>
+			<div className="device_data" style={style_object.device_data}>
+				<DataWidget name="pH" value={data.pH.value} units="" id={id}/>
+				<DataWidget name="temperature" value={data.temperature.value} units="°C" id={id}/>
+				<DataWidget name="dissolved_o2" value={data.dissolved_o2.value} units="ppm" id={id} />
+			</div>
 		</div>
 	)
-
 }
 
 export default Device;
+
+
+
+// Styles ---
+var style_object = {
+	device: {
+		width: "95%",
+		height: "100%",
+		backgroundColor: "white",
+		borderRadius: "10px",
+		boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.75)",
+		display: "flex",
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		padding: "10px"
+	}, 
+	device_details: {
+		width: "100%",
+		display: "flex",
+		flexDirection: "column ",
+		justifyContent: "space-between",
+		alignItems: "center"
+	},
+	data_title: {
+		fontSize: "20px",
+		fontWeight: "bold",
+		margin: "10px",
+		fontFamily: "Roboto Black"
+	},
+	data_id: {
+		fontSize: "10px",
+		fontWeight: "light",
+		fontFamily: "Roboto Thin"
+	},
+	device_data: {
+		display: "flex",
+		flexDirection: "row",
+		justifyContent: "space-between",
+		allignItems: "center"
+	}
+}

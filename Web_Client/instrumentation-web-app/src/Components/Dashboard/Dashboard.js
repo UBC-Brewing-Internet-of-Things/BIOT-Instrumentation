@@ -175,7 +175,7 @@ function Dashboard() {
     return (
         <div classname="main-container">
             <h1>Web-Brew</h1>
-			<div classname="device-list">
+			<div classname="device-list" style={style_object.device_list}>
 				{
 					devices_rendered.length > 0 ? devices_rendered : <p>No devices connected</p>
 				}
@@ -185,3 +185,15 @@ function Dashboard() {
 }
 
 export default Dashboard;
+
+// styles
+var style_object = {
+	device_list: {
+		width: "100%",
+		height: "100%",
+		display: "flex",
+		flexDirection: "column",
+		justifyContent: "flex-start",
+		alignItems: "center"
+	}
+}
