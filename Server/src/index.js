@@ -94,11 +94,15 @@ function messageDispatcher(message) {
 	if (message.event === 'get_data_devices') {
 		const data_devices = device_manager.getDataDevices();
 		const message_to_send = JSON.stringify({
-			event: "data_devices",
+			event: "data_device_list",
 			data_devices: data_devices
 		});
 		console.log(message_to_send);
-		device_manager.findClientById(message.id).socket.send(message_to_send);
+		const device = device_manager.findClientById(message.id);
+		if (device !== undefined) {
+			device.socket.send(message_to_send);
+			console.log("sent data device list to " + message.id);
+		}
 	}
 }
 
@@ -113,7 +117,7 @@ function broadcastMessage(message) {
 
 
 // create an express server object
-const server = app.listen(process.env.port || 3001);
+const server = app.listen(3001);
 // When a client makes a http:// upgrade request to the express server,
 //  we use the ws_server object to handle the upgrade to the ws:// 
 server.on('upgrade', (request, socket_obj, head) => {

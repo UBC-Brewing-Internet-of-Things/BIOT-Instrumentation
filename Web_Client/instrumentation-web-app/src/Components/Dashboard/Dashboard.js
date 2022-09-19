@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState, useCallback } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import { SocketContext } from "../../socket-context";
-import { MessageParser, registerCallback } from '../MessageParser.js';
+import { MessageParser, registerCallback } from '../../MessageParser.js';
 import Device from './Device.js';
 
 
@@ -36,7 +36,7 @@ function Dashboard() {
 		console.log(message_json);
 		console.log("registering...");
 		if (message_json.event === "register") {
-			setClientId(message_json.id);
+			client_id = message_json.client_id;
 			const response = JSON.stringify({
 				event : "register_web_client",
 				id: message_json.id,
@@ -44,6 +44,7 @@ function Dashboard() {
 				type: "Web Client" 
 			})
 			socket.send(response);
+			socket.send(JSON.stringify({event: "get_data_devices", id: message_json.id}));
 		}
 	}
 
@@ -51,28 +52,27 @@ function Dashboard() {
 	function handleDeviceList(message_json) {
 		console.log(message_json);
 		console.log("device list received");
-		if (message_json.event === "device_list") {
 			// loop through message_json.devices
 			// for each device, create a new Device component
 			// add the component to the device_list
-		    for (device of message_json.devices) {
-				console.log(device);
+		    for (var device_json of message_json.data_devices) {
+				console.log(device_json);
 
-				// check that the device id is not already in the list of device ids
-				if(!device_ids.includes(device.id)) {
-					console.log("device id already in list");
+				// check if the device is already in devices
+				var device = devices.find((device) => device.id === device_json.id);
+				if (device ==! undefined) {
+					console.log("device already exists");
 					return;
 				}
 				var device = {
-					id: device.id,
-					name: device.name,
-					type: device.type,
-					data: device.data
+					id: device_json.id,
+					name: device_json.name,
+					type: device_json.type,
+					data: device_json.sensors
 				}
-				this.setDeviceList({devices: this.state.devices.push(device)});
-				this.setDeviceIds({device_ids: this.state.device_ids.push(device.id)});
+				setDevices(devices => [...devices, device]);
+				console.log(devices);
 			}
-		}
 	}
 
 	// function to handle data_update message
@@ -81,7 +81,7 @@ function Dashboard() {
 		console.log("data update received");
 		if (message_json.event === "data_update") {
 			const id = message_json.id;
-			var device = this.state.devices.find(device => device.id === id);
+			var device = devices.find(device => device.id === id);
 			device.data = message_json.data;
 		}
 	}
@@ -93,14 +93,24 @@ function Dashboard() {
 		if (message_json.event === "new_device") {
 			// create a new Device component
 			// add the component to the device_list
+
+
+			// check if the device is already in devices
+			var device = devices.find(device => device.id === message_json.id);
+			if (device !== undefined) {
+				console.log("device already exists");
+				return;
+			}
+
+
 			var device = {
 				id: message_json.id,
 				name: message_json.name,
 				type: message_json.type,
-				data: message_json.data
+				data: message_json.sensors
 			}
-			setDevices({devices: this.state.devices.push(device)});
-			setDeviceIds({device_ids: this.state.device_ids.push(device.id)});
+			setDevices(devices => [...devices, device]);
+			console.log(devices);
 		}
 	}
 
@@ -109,30 +119,38 @@ function Dashboard() {
 		console.log("device disconnected with id: " + message_json.id);
 		if (message_json.event === "device_disconnected") {
 			// remove the device with the matching id from the device list
-			var device = this.state.devices.find(device => device.id === message_json.id);
-			var index = this.state.devices.indexOf(device);
+			var device = devices.find(device => device.id === message_json.id);
+			var index = devices.indexOf(device);
 			if (index > -1) {
-				this.state.devices.splice(index, 1);
-			}
-
-			// remove the device id from the device id list
-			var index = this.state.device_ids.indexOf(message_json.id);
-			if (index > -1) {
-				this.state.device_ids.splice(index, 1);
+				devices.splice(index, 1);
 			}
 		}
 
 	}
 
+	function handleHeartbeat(message_json) {
+		console.log(message_json);
+		console.log("heartbeat received");
+		socket.send("heartbeat_client");
+		console.log("heartbeat sent");
+	}
+
 
 	// useState to store the list of devices, state is managed by the useEffect hook
 	// initial value is an empty array
-	const [devices, setDevices] = useState([]);
-	const [device_ids, setDeviceIds] = useState([]);
-	const [client_id, setClientId] = useState("");
+	const [devices, setDevices] = useState([{id: "11", name: "test", type: "test", data: {
+		"temperature": {
+			"value": 0,
+		},
+		"pH": {
+			"value": 0,
+		},
+		"dissolved_o2": {
+			"value": 0,
+		}
+	}}]);
 
-
-    // useEffect runs on first render (empty dependency array):
+    // useEffect runs on first render (or change in dependency)):
 	//  - request device list from server and subscribe for updates
 	//  - render a dash-view component for each device
 	//  - render a message if no devices are connected
@@ -143,19 +161,24 @@ function Dashboard() {
 		registerCallback('new_device', handleNewDevice);
 		registerCallback('register', handleRegister);
 		registerCallback('device_disconnected', handleDeviceDisconnected);
+		registerCallback('heartbeat_server', handleHeartbeat);
 		socket.addEventListener('message', MessageParser);
 		// send a message to the server to request the device list
-		socket.send(JSON.stringify({event: "get_data_devices", id: client_id}));
-    }, []);
+    }, [socket]);
 
+	console.log(devices);
+	var devices_rendered = devices.map((device) => {
+		return <Device key={device.id} id={device.id} name={device.name} data={device.data}/>
+	});
+	var client_id = useRef("");
     
     return (
         <div classname="main-container">
             <h1>Web-Brew</h1>
 			<div classname="device-list">
-				{devices.map((device) => {
-					return <Device key={device.id} props={device} />
-				})}
+				{
+					devices_rendered.length > 0 ? devices_rendered : <p>No devices connected</p>
+				}
 			</div>
         </div>
     )

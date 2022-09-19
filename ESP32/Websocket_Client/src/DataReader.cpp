@@ -29,7 +29,7 @@ esp_DataReader::esp_DataReader() {
 // TODO: perform reads in parallel?
 // TODO: refactor to use a single read function
 // TODO: add error handling
-void esp_DataReader::readData(char * response_buf) {
+void esp_DataReader::readData(char * response_buf, char * device_id) {
 	// array of bytes to hold the sensor data
 	unsigned char * data = new unsigned char[this->numSensors*2];
 	for (int i = 0; i < this->numSensors; i++) {
@@ -58,7 +58,7 @@ void esp_DataReader::readData(char * response_buf) {
 
 	// convert the data to JSON and store as a string in buffer
 	// TODO: device id...
-	prepareWSJSON(data, response_buf, "1234");
+	prepareWSJSON(data, response_buf, device_id);
 
 }
 

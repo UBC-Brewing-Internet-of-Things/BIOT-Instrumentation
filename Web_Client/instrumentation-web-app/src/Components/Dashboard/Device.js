@@ -11,20 +11,19 @@ import { SocketContext } from "../../socket-context.js";
 function Device(props) {
 	// usestate to store the device, state is managed by the useEffect hook
 	// initial value is an empty object
-	this.name = props.device.name;
-	this.id = props.device.id;
-	this.current_data_reading = props.device.current_data_reading;
+	const name = props.name;
+	const id = props.id;
+	var data = props.data;
+	console.log(data);
 	
-	function updateDevice(data) {
-		// update the device
-		this.current_data_reading = data;
-	}
-
 	return (
 		<div className="device">
-			<h2>{this.name}</h2>
-			<p>{this.id}</p>
-			<p> data = {this.current_data_reading}</p>
+			<h2>{name}</h2>
+			<p>{id}</p>
+
+			<p>ph = {data.pH ? data.pH.value : ""}</p>
+			<p>temp = {data.temp ? data.temperature.value : ""}</p>	
+			<p>disolved o2 = {data.dissolved_o2 ? data.dissolved_o2.value : ""}</p>
 		</div>
 	)
 

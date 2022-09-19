@@ -5,10 +5,11 @@
 const MessageFunctions = {
 	broadcast_chat: {},
 	register: {},
-	data_update: {},
+	device_update: {},
 	data_device_list: {},
 	new_device: {},
 	device_disconnected: {},
+	heartbeat_server: {},
 }
 
 function registerCallback(type, callback) {
@@ -16,15 +17,21 @@ function registerCallback(type, callback) {
 }
 
 function MessageParser(message) {
-	// parse the message into a json object
-	const message_json = JSON.parse(message.data);
-	// get the function associated with the message type
-	console.log(MessageFunctions[message_json.event]);
-	console.log(message_json.event);
-
-	const message_function = MessageFunctions[message_json.event];
-	// call the function
-	message_function(message_json);
+	console.log("message received: " + message);
+	if (message.data === "heartbeat_server") {
+		MessageFunctions.heartbeat_server();
+	} else {
+		// parse the message into a json object
+		const message_json = JSON.parse(message.data);
+		// get the function associated with the message type
+		const message_function = MessageFunctions[message_json.event];
+		// call the function
+		if (message_function !== undefined) {
+			message_function(message_json);
+		} else {
+			console.log("no function associated with message type: " + message_json.event);
+		}
+	}	
 }
 
 

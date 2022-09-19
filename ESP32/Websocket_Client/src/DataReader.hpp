@@ -15,7 +15,7 @@ class esp_DataReader {
 	public:
 	esp_DataReader();
 	~esp_DataReader();
-	void readData(char * response_buf);
+	void readData(char * response_buf, char * device_id);
 
 	private:
 	int numSensors;

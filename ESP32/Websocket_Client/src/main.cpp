@@ -6,7 +6,7 @@
 #include "WiFiManager.c"
 
 // Constants
-char * url = "upset-actors-know-142-179-65-220.loca.lt";
+char * url = "afraid-tips-relate-142-179-65-220.loca.lt";
 char * endpoint = "";
 
 
@@ -36,7 +36,7 @@ void app_main() {
 
 	while (1) {
 		dataDevice->readAndSendData();
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
+		vTaskDelay(10000 / portTICK_PERIOD_MS);
 	}
 
 }

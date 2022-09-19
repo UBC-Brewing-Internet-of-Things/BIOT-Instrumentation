@@ -10,6 +10,7 @@ DataDevice::DataDevice(char * url, char * endpoint, char * name) {
 DataDevice::DataDevice(char * url, char * endpoint, int port, char * name) {
 	ws = new esp_WebSocket(url, endpoint, port, (void *) this);
 	this->name = name;
+	this->id = "0";
 	dr = new esp_DataReader();
 }
 
@@ -20,7 +21,7 @@ DataDevice::~DataDevice() {
 
 void DataDevice::readAndSendData() {
 	char * data_buf = new char[100]; // TODO: make this dynamic
-	dr->readData(data_buf);
+	dr->readData(data_buf, getId());
 	// data_buf = "Hello World";
 	ws->WebSocket_send(data_buf);
 	delete data_buf;

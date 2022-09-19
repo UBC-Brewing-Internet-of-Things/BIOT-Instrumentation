@@ -96,10 +96,8 @@ class DeviceManager {
 		}
 		this.broadcastToWebClients(JSON.stringify({
 			event: "device_update",
-			data: {
-				id: id,
-				data: data
-			}
+			id: id,
+			data: data
 		}));
 	}
 
