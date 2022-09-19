@@ -91,15 +91,51 @@ class DeviceManager {
 	dispatchUpdate(id, data) {
 		const device = this.getDataDevice(id); 
 		if (device !== undefined) {
+			console.log("Dispatching update to device: " + id);
 			device.updateData(data);
 		}
 		this.broadcastToWebClients(JSON.stringify({
-			event: "update",
+			event: "device_update",
 			data: {
 				id: id,
 				data: data
 			}
 		}));
+	}
+
+	getDeviceList() {
+		const devices = [];
+		this.DataDevices.forEach(device => {
+			devices.push({
+				id: device.id,
+				name: device.name,
+				type: device.type,
+				sensors: device.sensors
+			});
+		});
+		this.WebClientDevices.forEach(device => {
+			devices.push({
+				id: device.id,
+				name: device.name,
+				type: device.type
+			});
+		});
+
+		return devices;
+	
+	}	
+
+	getDataDevices() {
+		const devices = [];
+		this.DataDevices.forEach(device => {
+			devices.push({
+				id: device.id,
+				name: device.name,
+				type: device.type,
+				sensors: device.sensors
+			});
+		});
+		return devices;
 	}
 
 	

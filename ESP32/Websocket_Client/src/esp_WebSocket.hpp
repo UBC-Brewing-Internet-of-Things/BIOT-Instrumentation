@@ -8,7 +8,7 @@ class esp_WebSocket {
 		esp_WebSocket(char * url, char * endpoint, void * parentDevice);
 		esp_WebSocket(char * url, char * endpoint, int port, void * parentDevice);
 		int WebSocket_send(char * message);
-		void Message_Received(char * message);
+		void Message_Received(char * message, int length);
 		//void Websocket_Event_Handler(void * handler_args, esp_event_base_t base, int32_t event_id, void * event_data);
 		void Register_callback(void (*callback)(void * event_arg, esp_event_base_t event_base, int32_t event_id, void *event_data));
 		void Websocket_Stop();

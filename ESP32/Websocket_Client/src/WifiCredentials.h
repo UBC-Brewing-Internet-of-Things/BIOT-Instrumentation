@@ -1,2 +1,2 @@
-#define SSID "Frehlic"
-#define PASSWORD "4038498680"
+#define SSID "***REMOVED***"
+#define PASSWORD "***REMOVED***"

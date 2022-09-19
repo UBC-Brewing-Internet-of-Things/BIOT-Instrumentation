@@ -13,7 +13,7 @@ var app = express();
 var device_manager = new DeviceManager();
 
 
-function register_data_evice(data) {
+function register_data_device(data) {
 	// register the device with the device manager
 	console.log("registering data device with id: " + data.id);
 	device_manager.addDataDevice(data.id, data.name, data.type, this);
@@ -39,13 +39,22 @@ ws_server.on("connection", socket => {
 	console.log("new connection id " + device_id);
 	
 	socket.isAlive = true;
-	socket.on('pong', heartbeat);
+
 
 	socket.on("message", message => { 
 		console.log(message);
+		
 		// convert the message from a buffer of bytes to a string
 		const message_string = message.toString();
 		console.log(message_string);
+
+		// check for heartbeat (if they ping, they're still alive)
+		if (message_string === "heartbeat_client") {
+			console.log("heartbeat received");
+			socket.isAlive = true;
+			return;
+		}
+
 		const json_message = JSON.parse(message_string);
 		console.log(json_message);
 
@@ -69,19 +78,28 @@ ws_server.on("connection", socket => {
 function messageDispatcher(message) {
 	if (message.event === "chat_message") {
 		// broadcast the message to all clients
-		const message_received = JSON.stringify({
+		const message_to_send = JSON.stringify({
 			event: "broadcast_chat",
 			message: message.message
 		});
-		console.log(message_received);
-		broadcastMessage(message_received);
+		console.log(message_to_send);
+		broadcastMessage(message_to_send);
 	}
 
 	if (message.event === "data_update") {
 		// update the device data
 		device_manager.dispatchUpdate(message.id, message.data);
 	}
-
+	
+	if (message.event === 'get_data_devices') {
+		const data_devices = device_manager.getDataDevices();
+		const message_to_send = JSON.stringify({
+			event: "data_devices",
+			data_devices: data_devices
+		});
+		console.log(message_to_send);
+		device_manager.findClientById(message.id).socket.send(message_to_send);
+	}
 }
 
 function broadcastMessage(message) {
@@ -109,24 +127,24 @@ app.get('/', function (req, res) {
 	res.send(device_manager.getDeviceList());
 });
 
-
-// a heartbeat function to keep the connection alive
-// this function and the ping function are based on examples from the ws library docs
-function heartbeat() {
-	this.isAlive = true;
-}
-
 // ping function to see if clients are still connected
 function ping() {
 	ws_server.clients.forEach(function each(ws) {
 		if (ws.isAlive === false) {
-
+			device = device_manager.findClientBySocket(ws);
+			console.log("dead client " + device.id + " disconnected");
+			if (device !== undefined) {
+				console.log("removing device: " + device.name);
+				device_manager.removeDeviceBySocket(ws);
+			}
 			return ws.terminate();
 		}
+		// every 30s we set the isAlive flag to false, and then ping the client
 		ws.isAlive = false;
-		ws.ping();
+		console.log("pinging client");
+		ws.send('heartbeat_server'); // if they're alive, they'll respond with a heartbeat_client message
 	});
 }
 
 // set up a timer to ping the clients every 30 seconds
-const interval = setInterval(ping, 30000);
+const interval = setInterval(ping, 10000);

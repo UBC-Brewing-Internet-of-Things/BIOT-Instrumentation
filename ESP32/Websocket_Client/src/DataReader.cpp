@@ -29,30 +29,31 @@ esp_DataReader::esp_DataReader() {
 // TODO: perform reads in parallel?
 // TODO: refactor to use a single read function
 // TODO: add error handling
-void esp_DataReader::readData(char ** response_buf) {
+void esp_DataReader::readData(char * response_buf) {
 	// array of bytes to hold the sensor data
-	unsigned char * data = new unsigned char[this->numSensors];
+	unsigned char * data = new unsigned char[this->numSensors*2];
 	for (int i = 0; i < this->numSensors; i++) {
 		// create a cmd link to the I2C bus
-		i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-		i2c_master_start(cmd);
+		// i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+		// i2c_master_start(cmd);
 
-		// write to the I2C bus at the desired sensor's address
-		// address is left shifted by 1 to account for the read bit
-		i2c_master_write_byte(cmd, this->sensors[i]->address << 1 | I2C_MASTER_WRITE, true);
+		// // write to the I2C bus at the desired sensor's address
+		// // address is left shifted by 1 to account for the read bit
+		// i2c_master_write_byte(cmd, this->sensors[i]->address << 1 | I2C_MASTER_WRITE, true);
 		
-		// read the response code from the device
-		i2c_master_read(cmd, data + i * 2, 1, I2C_MASTER_ACK);
-		// TODO: check response code for error (see atlas scientific library)
-		// read the data from the device
-		i2c_master_read(cmd, data + i * 2 + 1, 1, I2C_MASTER_NACK);
+		// // read the response code from the device
+		// i2c_master_read(cmd, data + i * 2, 1, I2C_MASTER_ACK);
+		// // TODO: check response code for error (see atlas scientific library)
+		// // read the data from the device
+		// i2c_master_read(cmd, data + i * 2 + 1, 1, I2C_MASTER_NACK);
 		
-		// write the stop bit
-		i2c_master_stop(cmd);
-		// trigger command execution
-		i2c_master_cmd_begin(PORT, cmd, 1000 / portTICK_RATE_MS);
-		// delete the cmd link
-		i2c_cmd_link_delete(cmd);
+		// // write the stop bit
+		// i2c_master_stop(cmd);
+		// // trigger command execution
+		// i2c_master_cmd_begin(PORT, cmd, 1000 / portTICK_RATE_MS);
+		// // delete the cmd link
+		// i2c_cmd_link_delete(cmd);
+		data[i] = (char) i;
 	}
 
 	// convert the data to JSON and store as a string in buffer
@@ -62,8 +63,8 @@ void esp_DataReader::readData(char ** response_buf) {
 }
 
 // convert data to JSON and store as a string in buffer
-void esp_DataReader::prepareWSJSON(unsigned char * data, char ** response_buf, char * device_id) {
-	sprintf(*response_buf, "{\"event\" : \"data_update\",\"device_id\" : \"%s\",\"data\" : {\"ph\" : %d,\"temp\" : %d,\"O2\" : %d}}", device_id, data[1], data[3], data[5]);
+void esp_DataReader::prepareWSJSON(unsigned char * data, char * response_buf, char * device_id) {
+	sprintf(response_buf, "{\"event\" : \"data_update\",\"device_id\" : \"%s\",\"data\" : {\"ph\" : %d,\"temp\" : %d,\"O2\" : %d}}", device_id, data[1], data[3], data[5]);
 }
 
 

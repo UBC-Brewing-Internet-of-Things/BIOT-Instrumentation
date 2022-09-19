@@ -34,39 +34,60 @@ void esp_WebSocket::Register_callback(void (*callback)(void * event_arg, esp_eve
 
 
  
-void esp_WebSocket::Message_Received(char * message) {
-	if (message == NULL || strlen(message) == 0) {
+void esp_WebSocket::Message_Received(char * message, int length) {
+	if (message == NULL || length == 0) {
 		ESP_LOGI(TAG, "Message is null");
 		return;
 	}
+	ESP_LOGI(TAG, "Message received: %s length %d", message, length);
 
-	StaticJsonDocument<200> doc;
-	DeserializationError error = deserializeJson(doc, message);
-	if (error) {
-		ESP_LOGI(TAG, "Deserialization failed");
-		ESP_LOGE(TAG, "deserializeJson() failed: %s", error.c_str());
+
+	// check for heartbeat
+	char * ret = strstr(message, "heartbeat_server");
+	if (ret) {
+		ESP_LOGI(TAG, "Heartbeat received");
+		WebSocket_send("heartbeat_client");
 		return;
 	}
 
+	char message_chr = message[0];
+	ESP_LOGI(TAG, "Message received: %c", message_chr);
+
+	DynamicJsonDocument doc(1024);
+	DeserializationError error = deserializeJson(doc, (const char *) message);
+
+	if (error) {
+		ESP_LOGI(TAG, "Deserialization failed");
+		ESP_LOGE(TAG, "deserializeJson() failed with code %s", error.c_str());
+		return;
+	}
 	// Handler for custom event tag 
 	if (doc.containsKey("event")) {
 		const char * event = doc["event"];
-		if (strcmp(event, "register") == 1) {
+		ESP_LOGI(TAG, "Event received: %s", event);
+		if (strcmp(event, "register") == 0) { // strcmp is weird like that...
+			ESP_LOGI(TAG, "Register event triggered");
 			// get the id from the message and set it in the device
 			const char * id_const = doc["id"];
+			ESP_LOGI(TAG, "ID received: %s", id_const);
+
 			char * id = (char *)id_const;
 			((DataDevice *)parentDevice)->setId(id);
+
 			DataDevice * device = (DataDevice *) parentDevice;
 			device->setId(id);
+
 			StaticJsonDocument<200> response;
 			response["event"] = "register_data_device";
 			response["id"] = id;
 			response["name"] = device->getName();
 			response["type"] = "esp32";
-
+			
 			char buffer[200];
 			serializeJson(response, buffer);
+			ESP_LOGI(TAG, "Sending response: %s", buffer);
 			WebSocket_send(buffer);
+			ESP_LOGI(TAG, "Register response sent %s", buffer);
 		}	
 	}
 }
@@ -80,11 +101,20 @@ void Websocket_Event_Handler(void * event_arg, esp_event_base_t event_base, int3
 		case WEBSOCKET_EVENT_DISCONNECTED:
 			ESP_LOGI(TAG, "Websocket disconnected");
 			break;
-		case WEBSOCKET_EVENT_DATA:
-			ESP_LOGI(TAG, "Websocket data received");
-			ESP_LOGI(TAG, "Received=%.*s", data->data_len, (char *)data->data_ptr);
-			ws_callback_reference->Message_Received((char *)data->data_ptr);
-			break;
+		case WEBSOCKET_EVENT_DATA: 
+		{
+			ESP_LOGI(TAG, "Websocket data received with length %d", data->data_len);
+			if (data->op_code == 0x08 && data->data_len == 2) {
+            	ESP_LOGI(TAG, "Received closed message with code=%d", 256*data->data_ptr[0] + data->data_ptr[1]);
+			} else {			
+				int length = (int) data->data_len;
+				char * message = new char[length];
+				strncpy(message, (char *) data->data_ptr, data->data_len);
+				ws_callback_reference->Message_Received(message, length);
+				delete message;
+				break;
+			}
+		}
 		case WEBSOCKET_EVENT_ERROR:
 			ESP_LOGI(TAG, "Websocket error");
 			break;
@@ -104,48 +134,59 @@ void esp_WebSocket::Websocket_Stop() {
 
 esp_WebSocket::esp_WebSocket(char * url, char * endpoint, void * parentDevice) {
 	std::string uri_str = "ws://" + std::string(url) + "/" + std::string(endpoint);
-	ws_config.uri = uri_str.c_str();
+
+	// initalize the ws_config
+	esp_websocket_client_config_t config = {};
+	config.uri = uri_str.c_str();
+	ws_config = config;
 	ws_callback_reference = this;
 	this->parentDevice = parentDevice;
+
+	ESP_LOGI(TAG, "attempting to init websocket");
 	while (WebSocket_init() != 0) {
 		ESP_LOGI(TAG, "Attempting websocket init again");
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
-	}
-
-	// Register the websocket event handler
-	// error checking prob not needed
-	esp_err_t error = esp_websocket_register_events(ws_handle, WEBSOCKET_EVENT_ANY, (esp_event_handler_t) Websocket_Event_Handler, (void*)ws_handle);
-	if (error != ESP_OK) {
-		ESP_LOGI(TAG, "Error registering websocket events");
 	}
 };
 
 esp_WebSocket::esp_WebSocket(char * url, char * endpoint, int port, void * parentDevice) {
 	std::string uri_str = "ws://" + std::string(url) + "/" + std::string(endpoint);
-	ws_config.uri = uri_str.c_str();
+	// initalize the ws_config
+	esp_websocket_client_config_t config = {};
+	config.uri = uri_str.c_str();
+	ws_config = config;
 	ws_config.port = port;
 	this->parentDevice = parentDevice;
+
 	while (WebSocket_init() != 0) {
 		ESP_LOGI(TAG, "Attempting websocket init again");
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 
-	// error checking prob not needed
-	esp_err_t error = esp_websocket_register_events(ws_handle, WEBSOCKET_EVENT_ANY, (esp_event_handler_t) Websocket_Event_Handler, (void*)ws_handle);
-	if (error != ESP_OK) {
-		ESP_LOGI(TAG, "Error registering events");
-	}
+	
 };
 
 
 // Initialize the websocket connection
 // returns 1 if there was an error, 0 if there was no error
 int esp_WebSocket::WebSocket_init() {
+	ESP_LOGI(TAG, "Websocket init starting");
+
+	// initialize the websocket the conig
+
 	ws_handle = esp_websocket_client_init(&ws_config);
 	if (ws_handle == NULL) {
 		ESP_LOGI(TAG, "Websocket init failed");
 		return 1;
 	};
+
+	// error checking prob not needed 
+	esp_err_t error = esp_websocket_register_events(ws_handle, WEBSOCKET_EVENT_ANY, (esp_event_handler_t) Websocket_Event_Handler, (void*)ws_handle);
+	if (error != ESP_OK) {
+		ESP_LOGI(TAG, "Error registering events");
+	}
+
+
 	ESP_LOGI(TAG,"Websocket client initialized");
 	int timeout = 0; 
 	while (esp_websocket_client_is_connected(ws_handle) == 0 && timeout < TIMEOUT) {
@@ -156,10 +197,12 @@ int esp_WebSocket::WebSocket_init() {
 	    }
 		timeout++;
 	};
-	if (esp_websocket_client_is_connected(ws_handle) == 0) {
-		ESP_LOGI(TAG, "Websocket connection failed");
-		return 1;
-	}
+
+	// if (esp_websocket_client_is_connected(ws_handle) == 0) {
+	// 	ESP_LOGI(TAG, "The Websocket Client failed to connect");
+	// 	return 1;
+	// }
+
 	ESP_LOGI(TAG,"Websocket connected");
 	return 0;
 }

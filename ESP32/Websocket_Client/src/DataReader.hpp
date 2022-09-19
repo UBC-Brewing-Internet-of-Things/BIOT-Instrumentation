@@ -15,7 +15,7 @@ class esp_DataReader {
 	public:
 	esp_DataReader();
 	~esp_DataReader();
-	void readData(char ** response_buf);
+	void readData(char * response_buf);
 
 	private:
 	int numSensors;
@@ -23,7 +23,7 @@ class esp_DataReader {
 	EzoSensor * ph;
 	EzoSensor * temp;
 	EzoSensor * O2;
-	void prepareWSJSON(unsigned char * data, char ** response_buf, char * device_id);
+	void prepareWSJSON(unsigned char * data, char * response_buf, char * device_id);
 
 };
 

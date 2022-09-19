@@ -6,8 +6,8 @@
 #include "WiFiManager.c"
 
 // Constants
-char * url = "websocket-biot.herokuapp.com";
-char * endpoint = "chat";
+char * url = "upset-actors-know-142-179-65-220.loca.lt";
+char * endpoint = "";
 
 
 extern "C" {
@@ -31,11 +31,11 @@ void app_main() {
 
 	// Init Data Device
 	DataDevice * dataDevice = new DataDevice(url, endpoint, "test device");
-
+	ESP_LOGI(TAG, "DataDevice created with url: %s, endpoint: %s, deviceName: %s", url, endpoint, "test device");
 
 
 	while (1) {
-		// dataDevice->readAndSendData();
+		dataDevice->readAndSendData();
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 

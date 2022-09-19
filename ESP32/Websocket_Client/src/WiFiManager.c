@@ -18,12 +18,15 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
+#include "WiFiCredentials.h"
+
 /* The examples use WiFi configuration that you can set via project configuration menu
    If you'd rather not, just change the below entries to strings with
    the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
 */
-#define EXAMPLE_ESP_WIFI_SSID      "Frehlic"
-#define EXAMPLE_ESP_WIFI_PASS      "4038498680"
+
+#define EXAMPLE_ESP_WIFI_SSID    SSID
+#define EXAMPLE_ESP_WIFI_PASS    PASSWORD
 #define EXAMPLE_ESP_MAXIMUM_RETRY  100
 
 #if CONFIG_ESP_WIFI_AUTH_OPEN

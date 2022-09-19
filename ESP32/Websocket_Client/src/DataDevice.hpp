@@ -20,6 +20,6 @@ class DataDevice {
 	esp_WebSocket * ws;
 	char * id;
 	char * name;
-	//esp_DataReader * dr;
+	esp_DataReader * dr;
 
 };

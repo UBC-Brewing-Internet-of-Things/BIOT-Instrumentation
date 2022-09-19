@@ -4,7 +4,11 @@
 
 const MessageFunctions = {
 	broadcast_chat: {},
-	register: {}
+	register: {},
+	data_update: {},
+	data_device_list: {},
+	new_device: {},
+	device_disconnected: {},
 }
 
 function registerCallback(type, callback) {
