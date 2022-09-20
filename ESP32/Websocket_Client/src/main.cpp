@@ -6,7 +6,7 @@
 #include "WiFiManager.c"
 
 // Constants
-char * url = "weak-radios-tie-142-179-65-220.loca.lt";
+char * url = "spotty-frogs-search-142-179-65-220.loca.lt";
 char * endpoint = "";
 
 
@@ -30,7 +30,7 @@ void app_main() {
     wifi_init_sta();
 
 	// Init Data Device
-	DataDevice * dataDevice = new DataDevice(url, endpoint, "test device");
+	DataDevice * dataDevice = new DataDevice(url, endpoint, "Fermenter");
 	ESP_LOGI(TAG, "DataDevice created with url: %s, endpoint: %s, deviceName: %s", url, endpoint, "test device");
 
 	// wait for everything to connect

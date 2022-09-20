@@ -51,24 +51,26 @@ var style_object = {
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "center",
-		padding: "10px"
+		padding: "2vh",
+		margin: "2vh 0"
 	}, 
 	device_details: {
 		width: "100%",
 		display: "flex",
 		flexDirection: "column",
 		justifyContent: "space-between",
-		alignItems: "center",
-		textAlign: "left"
+		alignItems: "flex-start",
+		textAlign: "left",
+		margin: "0 0"
 	},
 	data_title: {
-		fontSize: "20px",
+		fontSize: "7vw",
 		fontWeight: "bold",
-		margin: "10px",
+		margin: "10px 0",
 		fontFamily: "Roboto Black"
 	},
 	data_id: {
-		fontSize: "10px",
+		fontSize: "2vw",
 		fontWeight: "light",
 		fontFamily: "Roboto Thin"
 	},

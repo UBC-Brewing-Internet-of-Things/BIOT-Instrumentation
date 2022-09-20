@@ -164,36 +164,30 @@ function Dashboard() {
 	var devices_rendered = [];
 	var client_id = useRef("");
     // useEffect runs on first render (or change in dependency)):
-	//  - request device list from server and subscribe for updates
-	//  - render a dash-view component for each device
-	//  - render a message if no devices are connected
     useEffect(() => {
 		// once component is mounted, register callbacks and request device list
-		console.log("registering callbacks, use effect");
 		registerCallback('data_device_list', handleDeviceList);
 		registerCallback('device_update', handleDataUpdate);
 		registerCallback('new_device', handleNewDevice);
 		registerCallback('register', handleRegister);
 		registerCallback('device_disconnected', handleDeviceDisconnected);
 		registerCallback('heartbeat_server', handleHeartbeat);
-		socket.addEventListener('message', MessageParser);
-		new_device = false;
-    }, [socket, devices]);
+    }, [devices]);
 
 	useEffect(() => {
-		console.log("devices updated");
-		console.log(devices);
-		devices_rendered = [];
-		for (var device of devices) {
-			devices_rendered.push(<Device key={device.id} id={device.id} name={device.name} type={device.type} data={device.data} />);
-		}
-		console.log(devices_rendered);
-	}, [devices]);
+		socket.addEventListener('message', MessageParser);
+	}, [socket]);
+
 
 	devices.map(device => {devices_rendered.push(<Device key={device.id} id={device.id} name={device.name} type={device.type} data={device.data} />)});
 
+	// We'll ask for a new list of devices every minute
+	// This is to ensure that the list is up to date in case a device is added or removed
+	setInterval(() => {
+		socket.send(JSON.stringify({event: "get_data_devices", id: client_id.current}));
+	}, 60000);
+	
 
-    
     return (
         <div classname="main-container">
             <h1>Web-Brew</h1>
@@ -215,7 +209,7 @@ var style_object = {
 		height: "100%",
 		display: "flex",
 		flexDirection: "column",
-		justifyContent: "flex-start",
-		alignItems: "center"
+		justifyContent: "space-between",
+		alignItems: "center",
 	}
 }

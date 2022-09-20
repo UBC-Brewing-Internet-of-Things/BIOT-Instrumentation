@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 // a simple data widget that displays the current value of a data device, and the units of the data
 // undeneath the data value is the name of the data
@@ -34,6 +34,7 @@ function DataWidget(props) {
 	const value = props.value;
 	const name = props.name;
 	const units = props.units;
+	//var previous_value = useRef(0);
 
 
 	const canvas_id = "circleCanvas" + props.name + props.id;
@@ -49,12 +50,31 @@ function DataWidget(props) {
 			context.clearRect(0,0,canvas.width,canvas.height);
 			context.strokeStyle = 'black';
 			context.lineWidth = 7;
-			context.beginPath();
+			context.lineCap = 'round';
 			var end_angle = calculateEndAngle(props.value, props.name);
-			context.arc(canvas.width/2, canvas.width/2, canvas.width/2 - 3, 3/2*(Math.PI), end_angle);
+			const base_angle = 3/2 * (Math.PI);
+			//const start_angle = previous_value.current || base_angle;
+			// if (animation_interval) {
+			// 	clearInterval(animation_interval);
+			// }
+			//animateArcToNextPosition(context, start_angle, end_angle, canvas.width/2 - 3, canvas.height/2, canvas.width/2);
+			// var current_angle = start_angle;
+			// var steps = 1;
+			// var step_angle = (end_angle - start_angle) / steps;
+			// for (var i = 0; i < steps; i++) {
+			// 	context.beginPath();
+			// 	context.arc(canvas.width/2, canvas.height/2, canvas.width/2 - 3, base_angle, current_angle);
+			// 	context.stroke();
+			// 	current_angle += step_angle;
+			// 	//console.log("current angle: " + current_angle);
+			// }
+			// previous_value.current = end_angle;
+			context.beginPath();
+			context.arc(canvas.width/2, canvas.height/2, canvas.width/2 - 3, base_angle, end_angle);
 			context.stroke();
 		}
 	});
+
 
 	return (
 		<div className="data-widget" style={style_object.data_widget}>
