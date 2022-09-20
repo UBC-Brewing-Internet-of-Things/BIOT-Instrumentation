@@ -203,8 +203,6 @@ esp_WebSocket::esp_WebSocket(char * url, char * endpoint, int port, void * paren
 		ESP_LOGI(TAG, "Attempting websocket init again");
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
-
-	
 };
 
 
@@ -214,7 +212,7 @@ int esp_WebSocket::WebSocket_init() {
 	ESP_LOGI(TAG, "Websocket init starting");
 
 	// initialize the websocket the conig
-
+    esp_websocket_client_config_t config = {}; 
 	ws_handle = esp_websocket_client_init(&ws_config);
 	if (ws_handle == NULL) {
 		ESP_LOGI(TAG, "Websocket init failed");

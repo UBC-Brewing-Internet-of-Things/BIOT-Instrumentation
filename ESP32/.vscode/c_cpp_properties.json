@@ -13,7 +13,8 @@
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "macos-clang-x64",
-            "compileCommands": "${workspaceFolder}/Websocket_Client/.pio/build/nodemcu-32s/compile_commands.json"
+            "compileCommands": "${workspaceFolder}/Websocket_Client/.pio/build/nodemcu-32s/compile_commands.json",
+            "configurationProvider": "ms-vscode.cmake-tools"
         }
     ],
     "version": 4
