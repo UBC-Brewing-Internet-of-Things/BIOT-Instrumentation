@@ -5,7 +5,7 @@
 #include "DataDevice.hpp"
 #include "esp_log.h"
 #include <string>
-#include <ArduinoJson.h>
+
 
 #define TIMEOUT 10000
 
@@ -14,12 +14,40 @@ esp_WebSocket * ws_callback_reference;
 static const char* TAG = "WebSocket";
 
 // Simple send method that sends a message to the websocket server
+int esp_WebSocket::WebSocket_send_with_id(StaticJsonDocument<200> buff) {
+	if (ws_handle == NULL || esp_websocket_client_is_connected(ws_handle) == 0) {
+		ESP_LOGI(TAG,"Websocket not connected");
+		return -1;
+	};
+	
+	// add the device id to the message
+	char * device_id = this->getID();
+	ESP_LOGI(TAG, "Adding device id to message: %s", device_id);
+	buff["id"] = device_id;
+
+	// convert the message to a string
+	char message[200];
+	serializeJson(buff, message);
+
+	// send the message
+	ESP_LOGI(TAG, "Sending message: %s", message);
+	int ret = esp_websocket_client_send(ws_handle, message, strlen(message), TIMEOUT);
+	if (ret < 0) {
+		ESP_LOGE(TAG, "Error sending message");
+		return -1;
+	}
+	
+	return 0;
+}
+
 int esp_WebSocket::WebSocket_send(char * message) {
 	if (ws_handle == NULL || esp_websocket_client_is_connected(ws_handle) == 0) {
 		ESP_LOGI(TAG,"Websocket not connected");
 		return -1;
 	};
+
 	int len = strlen(message);
+	ESP_LOGI(TAG, "Sending message: %s", message);
 	esp_websocket_client_send(ws_handle, message, len, portMAX_DELAY);
 	return 0;
 }
@@ -32,6 +60,14 @@ void esp_WebSocket::Register_callback(void (*callback)(void * event_arg, esp_eve
 	esp_websocket_register_events(ws_handle, WEBSOCKET_EVENT_DATA, callback, NULL);
 }
 
+void esp_WebSocket::setID(const char * id) {
+	strncpy(this->id, id, 37);
+	ESP_LOGI(TAG, "Set device id to: %s", this->id);
+}
+
+char * esp_WebSocket::getID() {
+	return this->id;
+}
 
  
 void esp_WebSocket::Message_Received(char * message, int length) {
@@ -71,16 +107,17 @@ void esp_WebSocket::Message_Received(char * message, int length) {
 			const char * id_const = doc["id"];
 			ESP_LOGI(TAG, "ID received: %s", id_const);
 
+			DataDevice * dd = (DataDevice *) parentDevice;
 			char * id = (char *)id_const;
-			((DataDevice *)parentDevice)->setId(id);
 
-			DataDevice * device = (DataDevice *) parentDevice;
-			device->setId(id);
+			ESP_LOGI(TAG, "ID received (translated): %s", id);
+			this->setID(id_const);
+			dd->setId(id_const);
 
 			StaticJsonDocument<200> response;
 			response["event"] = "register_data_device";
 			response["id"] = id;
-			response["name"] = device->getName();
+			response["name"] = dd->getName();
 			response["type"] = "esp32";
 			
 			char buffer[200];
@@ -91,6 +128,9 @@ void esp_WebSocket::Message_Received(char * message, int length) {
 		}	
 	}
 }
+
+
+
 
 void Websocket_Event_Handler(void * event_arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
 	esp_websocket_event_data_t *data = (esp_websocket_event_data_t *)event_data;
@@ -134,7 +174,7 @@ void esp_WebSocket::Websocket_Stop() {
 
 esp_WebSocket::esp_WebSocket(char * url, char * endpoint, void * parentDevice) {
 	std::string uri_str = "ws://" + std::string(url) + "/" + std::string(endpoint);
-
+	strncpy(this->id, "000000000000000000000000000000000000", 37);
 	// initalize the ws_config
 	esp_websocket_client_config_t config = {};
 	config.uri = uri_str.c_str();
@@ -151,6 +191,7 @@ esp_WebSocket::esp_WebSocket(char * url, char * endpoint, void * parentDevice) {
 
 esp_WebSocket::esp_WebSocket(char * url, char * endpoint, int port, void * parentDevice) {
 	std::string uri_str = "ws://" + std::string(url) + "/" + std::string(endpoint);
+	strncpy(this->id, "000000000000000000000000000000000000", 37);
 	// initalize the ws_config
 	esp_websocket_client_config_t config = {};
 	config.uri = uri_str.c_str();

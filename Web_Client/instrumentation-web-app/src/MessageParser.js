@@ -17,7 +17,7 @@ function registerCallback(type, callback) {
 }
 
 function MessageParser(message) {
-	console.log("message received: " + message);
+	console.log("message received: " + message.data);
 	if (message.data === "heartbeat_server") {
 		MessageFunctions.heartbeat_server();
 	} else {

@@ -88,16 +88,18 @@ function messageDispatcher(message) {
 
 	if (message.event === "data_update") {
 		// update the device data
-		device_manager.dispatchUpdate(message.id, message.data);
+		const data = message.data;
+		device_manager.dispatchUpdate(message.id, data);
 	}
 	
 	if (message.event === 'get_data_devices') {
 		const data_devices = device_manager.getDataDevices();
-		const message_to_send = JSON.stringify({
+		var message_to_send = {
 			event: "data_device_list",
 			data_devices: data_devices
-		});
+		};
 		console.log(message_to_send);
+		message_to_send = JSON.stringify(message_to_send);
 		const device = device_manager.findClientById(message.id);
 		if (device !== undefined) {
 			device.socket.send(message_to_send);
@@ -136,9 +138,8 @@ function ping() {
 	ws_server.clients.forEach(function each(ws) {
 		if (ws.isAlive === false) {
 			device = device_manager.findClientBySocket(ws);
-			console.log("dead client " + device.id + " disconnected");
 			if (device !== undefined) {
-				console.log("removing device: " + device.name);
+				console.log("removing device: " + device.id);
 				device_manager.removeDeviceBySocket(ws);
 			}
 			return ws.terminate();

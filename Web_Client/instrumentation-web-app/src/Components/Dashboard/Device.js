@@ -1,6 +1,4 @@
-import { style } from "@mui/system";
 import React from "react";
-import { SocketContext } from "../../socket-context.js";
 import DataWidget from "../DataWidget.js";
 
 // Data Device component
@@ -22,11 +20,17 @@ function Device(props) {
 				<p className="data_title" style={style_object.data_title}>{name}</p>
 				<p className="data_id" style={style_object.data_id}>id:{id}</p>
 			</div>
-			<div className="device_data" style={style_object.device_data}>
-				<DataWidget name="pH" value={data.pH.value} units="" id={id}/>
-				<DataWidget name="temperature" value={data.temperature.value} units="°C" id={id}/>
-				<DataWidget name="dissolved_o2" value={data.dissolved_o2.value} units="ppm" id={id} />
-			</div>
+			{ data ? 
+				<div className="device_data" style={style_object.device_data}>
+					<DataWidget name="pH" value={data.pH} units="" id={id} />
+			  		<DataWidget name="temperature" value={data.temperature} units="°C" id={id} />
+					<DataWidget name="dissolved_o2" value={data.dissolved_o2} units="ppm" id={id} />
+				</div>
+				:
+				<div className="device_data" style={style_object.device_data}>
+					<p className="data_title" style={style_object.data_title}>No data</p>
+				</div>
+			}
 		</div>
 	)
 }
@@ -52,9 +56,10 @@ var style_object = {
 	device_details: {
 		width: "100%",
 		display: "flex",
-		flexDirection: "column ",
+		flexDirection: "column",
 		justifyContent: "space-between",
-		alignItems: "center"
+		alignItems: "center",
+		textAlign: "left"
 	},
 	data_title: {
 		fontSize: "20px",

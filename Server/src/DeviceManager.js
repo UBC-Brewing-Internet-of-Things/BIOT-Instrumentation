@@ -6,26 +6,17 @@ class DataDevice {
 		this.name = name;
 		this.type = type;
 		this.socket = socket;
-		this.sensors = {
-			temperature: {
-				value: null,
-				unit: "C"
-			},
-			pH: {
-				value: null,
-				
-			},
-			disolved_o2: {
-				value: null,
-				unit: "mg/L"
-			}
+		this.data = {
+			temperature: 0,
+			pH: 0,
+			dissolved_o2: 0
 		};
-	}
+	}	
 
-	updateData(temp, pH, disolved_o2) {
-		this.sensors.temperature.value = temp || null;
-		this.sensors.pH.value = pH || null;
-		this.sensors.disolved_o2.value = disolved_o2 || null;
+	updateData(temp, pH, dissolved_o2) {
+		this.data.temperature = temp || 0;
+		this.data.pH = pH || 0;
+		this.data.dissolved_o2 = dissolved_o2 || 0;
 	}
 
 }
@@ -39,6 +30,20 @@ class DeviceManager {
 	addDataDevice(id, name, type, socket) {
 		const device = new DataDevice(id, name, type, socket);
 		this.DataDevices.push(device);
+		const new_client = {
+			event: "new_device",
+			id: id,
+			name: name,
+			type: type,
+			data:
+			{
+				temperature: 0,
+				pH: 0,
+				dissolved_o2: 0
+			}
+		};
+		console.log("New device added: " + JSON.stringify(new_client));
+		this.broadcastToWebClients(JSON.stringify(new_client));
 	}
 
 	addWebClientDevice(id, name, type, socket) {
@@ -92,7 +97,7 @@ class DeviceManager {
 		const device = this.getDataDevice(id); 
 		if (device !== undefined) {
 			console.log("Dispatching update to device: " + id);
-			device.updateData(data);
+			device.updateData(data.temperature, data.pH, data.dissolved_o2);
 		}
 		this.broadcastToWebClients(JSON.stringify({
 			event: "device_update",
@@ -108,7 +113,11 @@ class DeviceManager {
 				id: device.id,
 				name: device.name,
 				type: device.type,
-				sensors: device.sensors
+				data: {
+					temperature: device.data.temperature,
+					pH: device.data.pH,
+					dissolved_o2: device.data.dissolved_o2
+				}
 			});
 		});
 		this.WebClientDevices.forEach(device => {
@@ -126,12 +135,17 @@ class DeviceManager {
 	getDataDevices() {
 		const devices = [];
 		this.DataDevices.forEach(device => {
-			devices.push({
+			var device_info = {
 				id: device.id,
 				name: device.name,
 				type: device.type,
-				sensors: device.sensors
-			});
+				data: {
+					temperature: device.data.temperature,
+					pH: device.data.pH,
+					dissolved_o2: device.data.dissolved_o2
+				}
+			}
+			devices.push(device_info);
 		});
 		return devices;
 	}

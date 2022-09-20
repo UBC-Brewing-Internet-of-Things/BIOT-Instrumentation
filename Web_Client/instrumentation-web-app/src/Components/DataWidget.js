@@ -26,11 +26,15 @@ function DataWidget(props) {
 	
 	function calculateEndAngle(value, name) {
 		const [min, max] = min_max[name];
-		console.log(name + " " + min + " " + max);
 		const percentage = calculatePercentage(value, min, max);
 		var angle = percentage * (360*(Math.PI/180));
 		return angle - Math.PI/2 + 0.00001;
 	}
+
+	const value = props.value;
+	const name = props.name;
+	const units = props.units;
+
 
 	const canvas_id = "circleCanvas" + props.name + props.id;
 
@@ -57,12 +61,11 @@ function DataWidget(props) {
 			<canvas id={canvas_id} style={style_object.circle_canvas}></canvas>
 			<div className="data-widget-circle" style={style_object.data_widget_circle}>
 					<div className="data-value-div" style={style_object.data_widget_div}>
-						<p className="data-widget-value" style={style_object.data_widget_value}>{props.value}</p>
-						<p className="data-widget-units" style={style_object.data_widget_units}>{props.units}</p>
+						<p className="data-widget-value" style={style_object.data_widget_value} key={'1'}>{value}</p>
+						<p className="data-widget-units" style={style_object.data_widget_units} key={'2'}>{units}</p>
 					</div>
-				<p className="data-widget-name" style={style_object.data_widget_name}>{props.name}</p>
+				<p className="data-widget-name" style={style_object.data_widget_name} key={'3'}>{name}</p>
 			</div>
-			
 		</div>
 	)
 }

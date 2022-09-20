@@ -10,7 +10,7 @@ class DataDevice {
 	DataDevice(char * url, char * endpoint, int port, char * name);
 	~DataDevice();
 	void readAndSendData();
-	void setId(char * id);
+	void setId(const char * id);
 	char * getId();
 	void setName(char * name);
 	char * getName();
@@ -18,7 +18,7 @@ class DataDevice {
 
 	private:
 	esp_WebSocket * ws;
-	char * id;
+	char id[37];
 	char * name;
 	esp_DataReader * dr;
 

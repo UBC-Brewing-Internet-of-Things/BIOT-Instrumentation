@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useRef } from "react";
+import React, { useContext, useEffect, useState, useRef, useCallback } from "react";
 import { SocketContext } from "../../socket-context";
 import { MessageParser, registerCallback } from '../../MessageParser.js';
 import Device from './Device.js';
@@ -31,9 +31,17 @@ function Dashboard() {
     // get the socket from the context
     const socket = useContext(SocketContext);
 
+	var new_device;
+	// useState to store the list of devices, state is managed by the useEffect hook
+	// initial value is an empty array
+	const [devices, setDevices] = useState([{id: "11", name: "test", type: "test", data: {
+		"temperature": 0,
+		"pH": 0,
+		"dissolved_o2": 0,
+	}}]);
+
 	// function to handle register message
 	function handleRegister(message_json) {
-		console.log(message_json);
 		console.log("registering...");
 		if (message_json.event === "register") {
 			client_id = message_json.client_id;
@@ -50,50 +58,64 @@ function Dashboard() {
 
 	// function to handle device_list message
 	function handleDeviceList(message_json) {
-		console.log(message_json);
 		console.log("device list received");
 			// loop through message_json.devices
 			// for each device, create a new Device component
 			// add the component to the device_list
 		    for (var device_json of message_json.data_devices) {
-				console.log(device_json);
-
+				const id = device_json.id;
 				// check if the device is already in devices
-				var device = devices.find((device) => device.id === device_json.id);
-				if (device ==! undefined) {
+				var device = devices.find((device) => device.id === id);
+				if (device ===! undefined) {
 					console.log("device already exists");
 					return;
 				}
-				var device = {
+				const temp_devices = [...devices];
+				const device_proto = {
 					id: device_json.id,
 					name: device_json.name,
 					type: device_json.type,
-					data: device_json.sensors
+					data: device_json.data
 				}
-				setDevices(devices => [...devices, device]);
-				console.log(devices);
+				temp_devices.push(device_proto);
+				setDevices(temp_devices);
+				console.log("added device: " + device_proto);
 			}
+		new_device = true;
 	}
 
 	// function to handle data_update message
-	function handleDataUpdate(message_json) {
-		console.log(message_json);
-		console.log("data update received");
-		if (message_json.event === "data_update") {
+	function handleDataUpdate (message_json) {
+		console.log("data update recevied");
+		if (message_json.event === "device_update") {
 			const id = message_json.id;
-			var device = devices.find(device => device.id === id);
-			device.data = message_json.data;
+			console.log("id: " + id);
+			// check if the device is already in devices
+			var device;
+			for (var device_l of devices) {
+				console.log("device id: " + device_l.id);
+				if (device_l.id === id) {
+					device = device_l;
+					break;
+				}
+			}
+			if (device === undefined) {
+				console.log("device not found");
+				return;
+			}
+			const temp_devices = [...devices];
+			const device_index = temp_devices.findIndex((device) => device.id === id);
+			temp_devices[device_index].data = message_json.data;
+			setDevices(temp_devices);
 		}
-	}
+	};
 
 	// function to handle new_device message
 	function handleNewDevice(message_json) {
-		console.log(message_json);
 		console.log("new device received");
 		if (message_json.event === "new_device") {
 			// create a new Device component
 			// add the component to the device_list
-
 
 			// check if the device is already in devices
 			var device = devices.find(device => device.id === message_json.id);
@@ -101,21 +123,22 @@ function Dashboard() {
 				console.log("device already exists");
 				return;
 			}
+			const temp_devices = [...devices];
 
-
-			var device = {
+			var device_proto = {
 				id: message_json.id,
 				name: message_json.name,
 				type: message_json.type,
-				data: message_json.sensors
+				data: message_json.data
 			}
-			setDevices(devices => [...devices, device]);
-			console.log(devices);
+			temp_devices.push(device_proto);
+			setDevices(temp_devices);
+			console.log("added device: " + device_proto);
+			new_device = true;
 		}
 	}
 
 	function handleDeviceDisconnected(message_json) {
-		console.log(message_json);
 		console.log("device disconnected with id: " + message_json.id);
 		if (message_json.event === "device_disconnected") {
 			// remove the device with the matching id from the device list
@@ -136,41 +159,40 @@ function Dashboard() {
 	}
 
 
-	// useState to store the list of devices, state is managed by the useEffect hook
-	// initial value is an empty array
-	const [devices, setDevices] = useState([{id: "11", name: "test", type: "test", data: {
-		"temperature": {
-			"value": 0,
-		},
-		"pH": {
-			"value": 0,
-		},
-		"dissolved_o2": {
-			"value": 0,
-		}
-	}}]);
 
+	// useEffect hook to manage the list of devices
+	var devices_rendered = [];
+	var client_id = useRef("");
     // useEffect runs on first render (or change in dependency)):
 	//  - request device list from server and subscribe for updates
 	//  - render a dash-view component for each device
 	//  - render a message if no devices are connected
     useEffect(() => {
 		// once component is mounted, register callbacks and request device list
+		console.log("registering callbacks, use effect");
 		registerCallback('data_device_list', handleDeviceList);
-		registerCallback('data_update', handleDataUpdate);
+		registerCallback('device_update', handleDataUpdate);
 		registerCallback('new_device', handleNewDevice);
 		registerCallback('register', handleRegister);
 		registerCallback('device_disconnected', handleDeviceDisconnected);
 		registerCallback('heartbeat_server', handleHeartbeat);
 		socket.addEventListener('message', MessageParser);
-		// send a message to the server to request the device list
-    }, [socket]);
+		new_device = false;
+    }, [socket, devices]);
 
-	console.log(devices);
-	var devices_rendered = devices.map((device) => {
-		return <Device key={device.id} id={device.id} name={device.name} data={device.data}/>
-	});
-	var client_id = useRef("");
+	useEffect(() => {
+		console.log("devices updated");
+		console.log(devices);
+		devices_rendered = [];
+		for (var device of devices) {
+			devices_rendered.push(<Device key={device.id} id={device.id} name={device.name} type={device.type} data={device.data} />);
+		}
+		console.log(devices_rendered);
+	}, [devices]);
+
+	devices.map(device => {devices_rendered.push(<Device key={device.id} id={device.id} name={device.name} type={device.type} data={device.data} />)});
+
+
     
     return (
         <div classname="main-container">

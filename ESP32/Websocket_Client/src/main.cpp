@@ -6,7 +6,7 @@
 #include "WiFiManager.c"
 
 // Constants
-char * url = "afraid-tips-relate-142-179-65-220.loca.lt";
+char * url = "weak-radios-tie-142-179-65-220.loca.lt";
 char * endpoint = "";
 
 
@@ -33,10 +33,11 @@ void app_main() {
 	DataDevice * dataDevice = new DataDevice(url, endpoint, "test device");
 	ESP_LOGI(TAG, "DataDevice created with url: %s, endpoint: %s, deviceName: %s", url, endpoint, "test device");
 
-
+	// wait for everything to connect
+	vTaskDelay(10000 / portTICK_PERIOD_MS);
 	while (1) {
 		dataDevice->readAndSendData();
-		vTaskDelay(10000 / portTICK_PERIOD_MS);
+		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 
 }
