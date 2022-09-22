@@ -106,6 +106,19 @@ function messageDispatcher(message) {
 			console.log("sent data device list to " + message.id);
 		}
 	}
+
+	if (message.event == "start_recording") {
+		console.log("starting recording for device " + message.id);
+		id = message.id;
+		device_manager.startRecording(id);
+	}
+
+	if (message.event == "stop_recording") {
+		console.log("stopping recording for " + message.id);
+		id = message.id;
+		device_manager.stopRecording(id);
+	}
+
 }
 
 function broadcastMessage(message) {

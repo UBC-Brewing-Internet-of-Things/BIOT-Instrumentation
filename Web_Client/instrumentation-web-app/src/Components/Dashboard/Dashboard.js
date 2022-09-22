@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState, useRef, useCallback } from "rea
 import { SocketContext } from "../../socket-context";
 import { MessageParser, registerCallback } from '../../MessageParser.js';
 import Device from './Device.js';
+import { Title } from "@mui/icons-material";
 
 
 // Dashboard container
@@ -24,27 +25,35 @@ import Device from './Device.js';
 				- Remove device from array
 	- For each DataDevice
 		- Render component
-
 */
 function Dashboard() {
  
     // get the socket from the context
     const socket = useContext(SocketContext);
 
-	var new_device;
 	// useState to store the list of devices, state is managed by the useEffect hook
 	// initial value is an empty array
-	const [devices, setDevices] = useState([{id: "11", name: "test", type: "test", data: {
+	const [devices, setDevices] = useState([
+		{id: "11", name: "test", type: "test", data: {
 		"temperature": 0,
 		"pH": 0,
 		"dissolved_o2": 0,
 	}}]);
 
+
+	// ------------- Callbacks -------------
+	// These are passed as a closure to the MessageParser
+	// Then, when a message with the corresponding event occurs, the callback is called
+	// Everytime the devices array is updated, the callback is re-registered with the MessageParser
+	// This updates the closure to use the updated device array
+
+
 	// function to handle register message
+	// Makes a request for the list of data_devices after registering
 	function handleRegister(message_json) {
-		console.log("registering...");
+		console.log("Handling register message");
 		if (message_json.event === "register") {
-			client_id = message_json.client_id;
+			client_id.current = message_json.client_id;
 			const response = JSON.stringify({
 				event : "register_web_client",
 				id: message_json.id,
@@ -81,7 +90,6 @@ function Dashboard() {
 				setDevices(temp_devices);
 				console.log("added device: " + device_proto);
 			}
-		new_device = true;
 	}
 
 	// function to handle data_update message
@@ -134,7 +142,6 @@ function Dashboard() {
 			temp_devices.push(device_proto);
 			setDevices(temp_devices);
 			console.log("added device: " + device_proto);
-			new_device = true;
 		}
 	}
 
@@ -190,7 +197,7 @@ function Dashboard() {
 
     return (
         <div classname="main-container">
-            <h1>Web-Brew</h1>
+            <h1 style={style_object.title} >Web-Brew</h1>
 			<div classname="device-list" style={style_object.device_list}>
 				{
 					devices_rendered.length > 0 ? devices_rendered : <p>No devices connected</p>
@@ -211,5 +218,10 @@ var style_object = {
 		flexDirection: "column",
 		justifyContent: "space-between",
 		alignItems: "center",
+	},
+	title: {
+		fontSize: "2em",
+		fontWeight: "bold",
+		fontFamily: "Roboto"
 	}
 }

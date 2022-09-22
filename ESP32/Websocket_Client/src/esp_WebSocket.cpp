@@ -76,8 +76,7 @@ void esp_WebSocket::Message_Received(char * message, int length) {
 		return;
 	}
 	ESP_LOGI(TAG, "Message received: %s length %d", message, length);
-
-
+	
 	// check for heartbeat
 	char * ret = strstr(message, "heartbeat_server");
 	if (ret) {
