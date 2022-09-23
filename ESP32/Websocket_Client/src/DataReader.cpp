@@ -32,29 +32,7 @@ esp_DataReader::esp_DataReader() {
 void esp_DataReader::readData(StaticJsonDocument<200> & doc, char * id) {
 	// array of bytes to hold the sensor data
 	int * data = new int[sizeof(int) * this->numSensors*2];
-	for (int i = 0; i < this->numSensors; i++) {
-		create a cmd link to the I2C bus
-		i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-		i2c_master_start(cmd);
 
-		// write to the I2C bus at the desired sensor's address
-		// address is left shifted by 1 to account for the read bit
-		i2c_master_write_byte(cmd, this->sensors[i]->address << 1 | I2C_MASTER_WRITE, true);
-		
-		// read the response code from the device
-		i2c_master_read(cmd, data + i * 2, 1, I2C_MASTER_ACK);
-		// TODO: check response code for error (see atlas scientific library)
-		// read the data from the device
-		i2c_master_read(cmd, data + i * 2 + 1, 1, I2C_MASTER_NACK);
-		
-		// write the stop bit
-		i2c_master_stop(cmd);
-		// trigger command execution
-		i2c_master_cmd_begin(PORT, cmd, 1000 / portTICK_RATE_MS);
-		// delete the cmd link
-		i2c_cmd_link_delete(cmd);
-		
-	}
 
 	data[0] = rand() % 14;
 	data[1] = rand() % 100;

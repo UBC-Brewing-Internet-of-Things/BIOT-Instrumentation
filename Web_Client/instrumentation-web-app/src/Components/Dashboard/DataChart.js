@@ -1,43 +1,106 @@
-import React , { useState, useEffect } from 'react';
+import React , { useState, useEffect , useRef} from 'react';
 import { Chart } from 'react-chartjs-2';
 import { Chart as ChartJS, LineController, LineElement, PointElement, LinearScale, Title, CategoryScale } from 'chart.js';
 
 ChartJS.register(LineController, LineElement, PointElement, LinearScale, Title, CategoryScale);
 
-
-
-
 function DataChart(props) {
-
 	
-	const [chartData, setChartData] = useState({datasets: []});
+	const [chartData, setChartData] = useState({
+		labels: [" "],
+		datasets: [
+			{
+				data: [0],
+				backgroundColor: [
+					// a nice blue
+					'rgba(54, 162, 235, 0.2)',
+				],
+				borderColor: [
+					// a nice blue
+					'rgba(54, 162, 235, 1)',
+				],
+				borderWidth: 1,
+			}
+		]
+	});
 
-
-	useEffect(() => {
-		const setChart = () => {
-			setChartData({
-				labels: "test",
-				datasets: [
-					{
-						label: "pH",
-						data: [1,2,3,4,5,6,7,8,9,10],
-						backgroundColor: "rgba(75,192,192,0.6)",
-						borderColor: "rgba(75,192,192,1)",
+	const options = {
+		responsive: true,
+		scales: {
+			y: {
+				beginAtZero: true,
+				title: {
+					display: true,
+					text: props.name,
+					// a nice blue color
+					color: 'rgba(54, 162, 235, 1)',
+					font: {
+						size: 20
 					}
-				]
-			});
+				}
+			}
 		}
-		setChart();	
-	}, []);
+	}
+
+	// number of points to display on the chart
+	const max_points = 10;
+	const [points, setPoints] = useState(0);
+	const chartRef = useRef(null);
+
+	// every 1000ms update the chart with the current props value
 
 
+	/// CHART UPDATE LOGIC
+	// we log 1 in every 10 messages.
+	const log_rate = 10;
+	const [log_count, setLogCount] = useState(0);
+	// Useffect runs everytime the 
 
+
+	// Everytime props.value changes, we update the chart
+	useEffect(() => {
+		const updateChart = () => {
+			const chart = chartRef.current;
+			if (chart !== null) {
+				if (points >= max_points) {
+					chart.data.datasets[0].data.shift();
+					chart.data.labels.shift();
+				} else {
+					setPoints(points + 1);
+				}
+				chart.data.datasets[0].data.push(props.value);
+				chart.data.labels.push(" ");
+				console.log("updating chart");
+				chart.update();
+			}	
+		}
+
+		// if (log_count === log_rate) {
+		// 	updateChart();			
+		// 	setLogCount(0);
+		// } else {
+		// 	setLogCount(log_count + 1);
+		// }
+		updateChart();
+
+	}, [props.value, chartRef]);
 
 	return (
-		<Chart type='line' data={chartData}/>
+		<div id="chart-container" style={style_object.chart}>
+			<Chart ref={chartRef} type='line' data={chartData} options={options}/>
+			<p style={{display:"none"}}>{props.value}</p>
+		</div>
 	)
-
 
 }
 
 export default DataChart;
+
+// STYLE
+
+const style_object = {
+	chart: {
+		width: '33%',
+		height: '33%',
+	}
+}

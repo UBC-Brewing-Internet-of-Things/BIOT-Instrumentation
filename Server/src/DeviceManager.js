@@ -1,6 +1,5 @@
 // A simple system to manage the list of esp devices connected to the websocket
 const DataWriter = require('./DataWriter.js');
-const DataWriter = require('./DataWriter.js');
 
 
 class DataDevice {
