@@ -49,6 +49,7 @@ function DataChart(props) {
 
 	
 	// Everytime props.value changes, we update the chart
+	// this lifts the logic for when to update the component up to the parent device
 	useEffect(() => {
 		const updateChart = () => {
 			const chart = chartRef.current;
@@ -76,7 +77,7 @@ function DataChart(props) {
 		}
 
 		return () => {
-			setChartData(chartRef.current.data);
+			setChartData(chart.data);
 		}
 	}, []);
 

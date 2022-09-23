@@ -17,7 +17,7 @@ function Device(props) {
 	const id = props.id;
 	let data = useRef(props.data);
 	data.current = props.data;
-
+	
 
 	const socket = useContext(SocketContext);
 
@@ -33,6 +33,8 @@ function Device(props) {
 	
 	let interval_length = 10000; // 10 seconds
 
+	// TODO: only works if reading is not the same as previous...
+	//       potential fix --> add a very small DELTA to the reading if it's the same as the previous reading
 	useEffect(() => {
 		// update the charts every 10 seconds
 		const interval = setInterval(() => {
@@ -44,14 +46,38 @@ function Device(props) {
 		return () => clearInterval(interval);
 	}, []);
 
+	const [recording, setRecording] = useState(false);
+	const buttonRef = useRef(null);
+
+	function handleRecordingClick() {
+		console.log("Recording button clicked");
+		if (!recording) {
+			socket.send(JSON.stringify({
+				event: "start_recording",
+				id: id,
+			}));
+			buttonRef.current.innerHTML = "Stop Recording";
+			setRecording(true);
+		} else {
+			socket.send(JSON.stringify({
+				event: "stop_recording",
+				id: id,
+			}));
+			buttonRef.current.innerHTML = "Start Recording";
+			setRecording(false);
+		}
+	}	
+
+	
+
 
 	// TODO: (??) Lift the logic for updating the charts to the parent component
 	// see below
 
 	return (
-		<div className="device" style={style_object.device} onClick={() => setExpanded(expanded => !expanded)}>
+		<div className="device" style={style_object.device}>
 			{/* Device name + id */}	
-			<div className="collapsed-view" style={style_object.collapsed_view}>
+			<div className="collapsed-view" style={style_object.collapsed_view} onClick={() => setExpanded(expanded => !expanded)}>
 				<div className="device_details" style ={style_object.device_details}>
 					<p className="data_title" style={style_object.data_title}>{name}</p>
 					<p className="data_id" style={style_object.data_id}>id:{id}</p>
@@ -75,11 +101,14 @@ function Device(props) {
 			</div>
 			{/* Expanded view, displays charts for each data reading */}
 			{ expanded && data &&
+				<>
 				<div className="expanded-view" style={style_object.expanded_view}>
 						<DataChart name="pH" value={phref.current} units="" id={id} />
 						<DataChart name="temperature" value={tempref.current} units="°C" id={id} />
 						<DataChart name="dissolved_o2" value={o2ref.current} units="ppm" id={id} />
 				</div>
+				<button ref={buttonRef}className="record_button" style={style_object.record_button} onClick={() => handleRecordingClick()}>Start Recording</button>
+				</>
 			}
 	</div>
 
@@ -148,8 +177,8 @@ var style_object = {
 		justifyContent: "space-between",
 		padding: "2vh",
 	},
-	button_css: {
-
+	record_button: {
+		
 	}
 }
 

@@ -26,10 +26,9 @@ class DataDevice {
 	startRecording() {
 		this.recording = true;
 		const filename = this.name + "_" + Date.now() + ".csv";
-		var DataWriter = new DataWriter(filename);
+		var DataWriter_v = new DataWriter_v(filename);
 		console.log("starting recording to " + filename);
 		this.recordingInterval = setInterval(() => {
-
 		    var data_to_write = {
 				time: Date.now(),
 				temperature: this.data.temperature,
@@ -37,7 +36,7 @@ class DataDevice {
 				dissolved_o2: this.data.dissolved_o2
 			};
 
-			DataWriter.writeData(this.data);
+			DataWriter_v.writeData(data_to_write);
 		}, this.recordingResolution);
 	}
 
@@ -186,6 +185,8 @@ class DeviceManager {
 		var device = this.getDataDevice(id);
 		if (device !== undefined) {
 			device.startRecording();
+		} else {
+			console.log("Device not found, cannot start recording");
 		}
 	}
 
@@ -193,6 +194,8 @@ class DeviceManager {
 		var device = this.getDataDevice(id);
 		if (device !== undefined) {
 			device.stopRecording();
+		} else {
+			console.log("Device not found, cannot stop recording");
 		}
 	}
 
