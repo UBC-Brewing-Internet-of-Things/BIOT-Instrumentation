@@ -197,7 +197,7 @@ function Dashboard() {
 
     return (
         <div classname="main-container">
-            <h1 style={style_object.title} >Web-Brew</h1>
+            <h1 style={style_object.title} >Connected Data Sources:</h1>
 			<div classname="device-list" style={style_object.device_list}>
 				{
 					devices_rendered.length > 0 ? devices_rendered : <p>No devices connected</p>

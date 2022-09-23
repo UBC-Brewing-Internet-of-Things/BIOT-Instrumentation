@@ -1,4 +1,4 @@
-import React , { useState , useEffect, useRef } from "react";
+import React , { useState , useEffect, useRef , useContext} from "react";
 import { SocketContext } from "../../socket-context.js";
 import DataWidget from "../DataWidget.js";
 import DataChart from "./DataChart.js";
@@ -18,6 +18,8 @@ function Device(props) {
 	let data = useRef(props.data);
 	data.current = props.data;
 
+
+	const socket = useContext(SocketContext);
 
 	// values for the charts, we call updateCharts every 10 seconds to update the props of the charts
 	// the useEffect in each chart will update the chart with the new data
@@ -95,7 +97,8 @@ var style_object = {
 		height: "100%",
 		backgroundColor: "white",
 		borderRadius: "10px",
-		boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.75)",
+		//boxShadow: "rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset", Cool 3d shadow
+		boxShadow: "rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px",
 		display: "flex",
 		flexDirection: "column",
 		justifyContent: "space-between",
@@ -144,8 +147,10 @@ var style_object = {
 		flexDirection: "row",
 		justifyContent: "space-between",
 		padding: "2vh",
+	},
+	button_css: {
+
 	}
-	
 }
 
 /*

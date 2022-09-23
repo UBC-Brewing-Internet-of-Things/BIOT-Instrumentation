@@ -47,16 +47,7 @@ function DataChart(props) {
 	const [points, setPoints] = useState(0);
 	const chartRef = useRef(null);
 
-	// every 1000ms update the chart with the current props value
-
-
-	/// CHART UPDATE LOGIC
-	// we log 1 in every 10 messages.
-	const log_rate = 10;
-	const [log_count, setLogCount] = useState(0);
-	// Useffect runs everytime the 
-
-
+	
 	// Everytime props.value changes, we update the chart
 	useEffect(() => {
 		const updateChart = () => {
@@ -70,20 +61,24 @@ function DataChart(props) {
 				}
 				chart.data.datasets[0].data.push(props.value);
 				chart.data.labels.push(" ");
-				console.log("updating chart");
 				chart.update();
 			}	
 		}
-
-		// if (log_count === log_rate) {
-		// 	updateChart();			
-		// 	setLogCount(0);
-		// } else {
-		// 	setLogCount(log_count + 1);
-		// }
 		updateChart();
 
 	}, [props.value, chartRef]);
+
+	// on component mount and unmout, we want to load/store the chart data from the state
+	useEffect(() => {
+		const chart = chartRef.current;
+		if (chart !== null) {
+			chart.data = chartData;
+		}
+
+		return () => {
+			setChartData(chartRef.current.data);
+		}
+	}, []);
 
 	return (
 		<div id="chart-container" style={style_object.chart}>
