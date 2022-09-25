@@ -6,7 +6,7 @@
 #include "WiFiManager.c"
 
 // Constants
-char * url = "sour-sheep-remain-142-179-65-220.loca.lt";
+char * url = "seven-flies-cry-142-179-65-220.loca.lt";
 char * endpoint = "";
 
 
