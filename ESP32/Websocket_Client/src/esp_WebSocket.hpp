@@ -8,8 +8,7 @@ class esp_WebSocket {
 	public:
 		esp_WebSocket(char * url, char * endpoint, void * parentDevice);
 		esp_WebSocket(char * url, char * endpoint, int port, void * parentDevice);
-		int WebSocket_send(char * message);
-		int WebSocket_send_with_id(StaticJsonDocument<200> buff);
+		int WebSocket_send(char * message);	
 		void Message_Received(char * message, int length);
 		void Register_callback(void (*callback)(void * event_arg, esp_event_base_t event_base, int32_t event_id, void *event_data));
 		void Websocket_Stop();
