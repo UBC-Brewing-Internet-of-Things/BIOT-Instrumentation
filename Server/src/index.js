@@ -29,6 +29,13 @@ function register_web_client(data) {
 	// register the device with the device manager
 	console.log("registering web client with id: " + data.id);
 	device_manager.addWebClientDevice(data.id, data.name, data.type, this);
+	// send the client a list of data devices
+	var message_to_send = {
+		event: "data_device_list",
+		devices: device_manager.getDataDevices()
+	};
+	message_to_send = JSON.stringify(message_to_send);
+	this.send(message_to_send);
 }
 
 const ws_server = new ws.Server({ noServer: true });
@@ -62,12 +69,15 @@ ws_server.on("connection", socket => {
 
 
 	socket.on("message", message => { 
-		console.log(message);
-		
 		// convert the message from a buffer of bytes to a string
-		const message_string = message.toString();
-		console.log(message_string);
-
+		var message_string = "";	
+		try {
+			message_string = message.toString(); // not sure if toString can throw an error
+		} catch (e) {
+			console.log("error converting message to string " + e);
+			return;
+		}
+	
 		// check for heartbeat (if they ping, they're still alive)
 		if (message_string === "heartbeat_client") {
 			console.log("heartbeat received");
@@ -83,15 +93,9 @@ ws_server.on("connection", socket => {
 			console.log("error parsing json: " + e);
 			return;
 		}
-		// SANITY CHECK MAKE SURE EVENT IS REGISTER
-		console.log("OHMYGOD                    " + json_message.event);
-		var sanity = json_message.event === "register_data_device";
-		console.log("SANITY CHECK" + sanity);
-
 		// check if the message is a registration message
 		// we'll handle this here so we can associate the device with the socket
 		if (json_message.event === "register_data_device") {
-			console.log("registering data device MESSAGE RECEIVED");
 			register_data_device.call(socket, json_message); // the call function allows us to set the context of the function call to the socket
 		} else if (json_message.event === 'register_web_client') {
 			register_web_client.call(socket, json_message);
@@ -107,7 +111,6 @@ ws_server.on("connection", socket => {
 });
 
 function messageDispatcher(message) {
-	
 	// if the id isn't registered, then we can't do anything with the message
 	if (device_manager.isRegistered(message.id) === false) {
 		console.log("device id " + message.id + " is not registered");
@@ -126,7 +129,7 @@ function messageDispatcher(message) {
 			event: "data_device_list",
 			data_devices: data_devices
 		};
-		console.log(message_to_send);
+		console.log("sending " + message_to_send);
 		message_to_send = JSON.stringify(message_to_send);
 		const device = device_manager.findClientById(message.id);
 		if (device !== undefined) {

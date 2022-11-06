@@ -33,7 +33,7 @@ class DataDevice {
 		// if this device disconnects, and rejoins with the same name
 		// we need to stop the recording for the old device
 		// and start recording for the new device
-		prev_device = this.parent.findRecordingDevice(this.name);
+		var prev_device = this.parent.findRecordingDevice(this.name);
 		if (prev_device !== undefined) {
 			prev_device.stopRecording();
 		}
@@ -115,6 +115,10 @@ class DeviceManager {
 		return this.recordingDevices.find(device => device.name === name);
 	}
 
+	addRecordingDevice(name, device) {
+		this.recordingDevices.push(device);
+	}
+
 	removeDeviceBySocket(socket) {
 		const device = this.findClientBySocket(socket);
 		if (device !== undefined) {
@@ -129,7 +133,7 @@ class DeviceManager {
 
 	// is device registered?
 	isRegistered(id) {
-		return this.DataDevices.find(device => device.id === id) !== undefined;
+		return this.DataDevices.find(device => device.id === id) !== undefined || this.WebClientDevices.find(device => device.id === id) !== undefined;
 	}
 
 	getDataDevice(id) {
@@ -141,7 +145,6 @@ class DeviceManager {
 	}
 	
 	findClientById(id) {
-		console.log(this.DataDevices);
 		return this.DataDevices.find(device => device.id === id) || this.WebClientDevices.find(device => device.id === id);
 	}
 
@@ -158,7 +161,7 @@ class DeviceManager {
 	dispatchUpdate(id, data) {
 		const device = this.getDataDevice(id); 
 		if (device !== undefined) {
-			console.log("Dispatching update to device: " + id);
+			console.log("Dispatching update to local device state: " + id);
 			device.updateData(data.temperature, data.pH, data.dissolved_o2);
 		}
 		this.broadcastToWebClients(JSON.stringify({

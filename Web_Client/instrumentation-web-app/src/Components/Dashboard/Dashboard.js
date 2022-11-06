@@ -33,12 +33,7 @@ function Dashboard() {
 
 	// useState to store the list of devices, state is managed by the useEffect hook
 	// initial value is an empty array
-	const [devices, setDevices] = useState([
-		{id: "11", name: "test", type: "test", data: {
-		"temperature": 0,
-		"pH": 0,
-		"dissolved_o2": 0,
-	}}]);
+	const [devices, setDevices] = useState([]);
 
 
 	// ------------- Callbacks -------------
@@ -61,7 +56,23 @@ function Dashboard() {
 				type: "Web Client" 
 			})
 			socket.send(response);
-			socket.send(JSON.stringify({event: "get_data_devices", id: message_json.id}));
+	
+
+			// we need a list of devices to display on the dashboard to get started, so we set a short interval to request the list of devices from the server
+			// if the device list is populated, we clear the interval
+			// this is a temporary solution, we should be able to request the list of devices on the initial connection
+			// var interval = setInterval(() => {
+			// 	if (devices.length === 0) {
+			// 		console.log("Requesting device list");
+			// 		socket.send(JSON.stringify({
+			// 			event: "get_data_devices",
+			// 			id: message_json.id
+			// 		}));
+			// 	} else {
+			// 		clearInterval(interval);
+			// 	}
+			// }, 10000);
+			
 		}
 	}
 
@@ -71,11 +82,19 @@ function Dashboard() {
 			// loop through message_json.devices
 			// for each device, create a new Device component
 			// add the component to the device_list
+
+			// first we check if the device_list from the server is empty
+			// if it is, we don't need to do anything
+			if (message_json.devices.length === 0) {
+				console.log("No devices connected to server");
+				return;
+			}
+			
 		    for (var device_json of message_json.data_devices) {
 				const id = device_json.id;
 				// check if the device is already in devices
 				var device = devices.find((device) => device.id === id);
-				if (device ===! undefined) {
+				if (device !== undefined) {
 					console.log("device already exists");
 					return;
 				}
@@ -101,7 +120,6 @@ function Dashboard() {
 			// check if the device is already in devices
 			var device;
 			for (var device_l of devices) {
-				console.log("device id: " + device_l.id);
 				if (device_l.id === id) {
 					device = device_l;
 					break;
@@ -190,9 +208,9 @@ function Dashboard() {
 
 	// We'll ask for a new list of devices every minute
 	// This is to ensure that the list is up to date in case a device is added or removed
-	setInterval(() => {
-		socket.send(JSON.stringify({event: "get_data_devices", id: client_id.current}));
-	}, 60000);
+	// setInterval(() => {
+	// 	socket.send(JSON.stringify({event: "get_data_devices", id: client_id.current}));
+	// }, 60000);
 	
 
     return (
