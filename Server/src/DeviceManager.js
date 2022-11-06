@@ -3,7 +3,7 @@ const DataWriter = require('./DataWriter.js');
 
 
 class DataDevice {
-	constructor(id, name, type, socket) {
+	constructor(id, name, type, socket, parent) {
 		this.id = id;
 		this.name = name;
 		this.type = type;
@@ -15,6 +15,7 @@ class DataDevice {
 		};
 		this.recordingInterval = null;
 		this.recordingResolution = 30000; // 30 seconds
+		this.parent = parent;
 	}	
 
 	updateData(temp, pH, dissolved_o2) {
@@ -26,8 +27,21 @@ class DataDevice {
 	startRecording() {
 		this.recording = true;
 		const filename = this.name + "_" + Date.now() + ".csv";
-		var DataWriter_v = new DataWriter_v(filename);
+		var DataWriter_v = new DataWriter(filename);
 		console.log("starting recording to " + filename);
+
+		// if this device disconnects, and rejoins with the same name
+		// we need to stop the recording for the old device
+		// and start recording for the new device
+		prev_device = this.parent.findRecordingDevice(this.name);
+		if (prev_device !== undefined) {
+			prev_device.stopRecording();
+		}
+		// remove prev device from the list of recording devices
+		this.parent.removeRecordingDevice(this.name);
+		// add this device to the list of recording devices
+		this.parent.addRecordingDevice(this.name, this);
+
 		this.recordingInterval = setInterval(() => {
 		    var data_to_write = {
 				time: Date.now(),
@@ -44,6 +58,8 @@ class DataDevice {
 		if (this.recordingInterval !== null) {
 			clearInterval(this.recordingInterval);
 			this.recordingInterval = null;
+			// remove from the list of recording devices
+			this.parent.removeRecordingDevice(this.name);
 			console.log("stopped recording");
 		} else {
 			console.log("no recording to stop");
@@ -56,10 +72,11 @@ class DeviceManager {
 	constructor() {
 		this.DataDevices = [];
 		this.WebClientDevices = [];
+		this.recordingDevices = []; // A recording must be explicitly started and stopped
 	}
 
 	addDataDevice(id, name, type, socket) {
-		const device = new DataDevice(id, name, type, socket);
+		const device = new DataDevice(id, name, type, socket, this);
 		this.DataDevices.push(device);
 		const new_client = {
 			event: "new_device",
@@ -78,7 +95,7 @@ class DeviceManager {
 	}
 
 	addWebClientDevice(id, name, type, socket) {
-		const device = new DataDevice(id, name, type, socket);
+		const device = new DataDevice(id, name, type, socket, this);
 		this.WebClientDevices.push(device);
 	}
 
@@ -88,6 +105,14 @@ class DeviceManager {
 
 	removeWebClientDevice(id) {
 		this.WebClientDevices = this.WebClientDevices.filter(device => device.id !== id);
+	}
+
+	removeRecordingDevice(name) {
+		this.recordingDevices = this.recordingDevices.filter(device => device.name !== name);
+	}
+
+	findRecordingDevice(name) {
+		return this.recordingDevices.find(device => device.name === name);
 	}
 
 	removeDeviceBySocket(socket) {

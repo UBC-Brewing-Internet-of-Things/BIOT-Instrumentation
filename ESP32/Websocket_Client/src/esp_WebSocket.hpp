@@ -11,7 +11,6 @@ class esp_WebSocket {
 		int WebSocket_send(char * message);
 		int WebSocket_send_with_id(StaticJsonDocument<200> buff);
 		void Message_Received(char * message, int length);
-		//void Websocket_Event_Handler(void * handler_args, esp_event_base_t base, int32_t event_id, void * event_data);
 		void Register_callback(void (*callback)(void * event_arg, esp_event_base_t event_base, int32_t event_id, void *event_data));
 		void Websocket_Stop();
 		void setID(const char * id);

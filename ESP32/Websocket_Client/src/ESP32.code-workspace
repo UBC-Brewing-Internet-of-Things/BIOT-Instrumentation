@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"name": "Websocket_Client",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"istream": "cpp",
+			"*.ipp": "cpp",
+			"system_error": "cpp",
+			"cstdio": "cpp",
+			"*.tcc": "cpp"
+		}
+	}
+}

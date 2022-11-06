@@ -96,6 +96,7 @@ void esp_WebSocket::Message_Received(char * message, int length) {
 		ESP_LOGE(TAG, "deserializeJson() failed with code %s", error.c_str());
 		return;
 	}
+	
 	// Handler for custom event tag 
 	if (doc.containsKey("event")) {
 		const char * event = doc["event"];
@@ -129,8 +130,9 @@ void esp_WebSocket::Message_Received(char * message, int length) {
 }
 
 
-
-
+// This is the websocket event handler, it is called when the websocket receives a message
+// It is registered in the esp_WebSocket::Register_callback method
+// The esp32 websocket library calls this method when a message is received
 void Websocket_Event_Handler(void * event_arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
 	esp_websocket_event_data_t *data = (esp_websocket_event_data_t *)event_data;
 	switch (event_id) {
@@ -160,8 +162,6 @@ void Websocket_Event_Handler(void * event_arg, esp_event_base_t event_base, int3
 	}
 }
 
-
-
 void esp_WebSocket::Websocket_Stop() {
 	if (ws_handle == NULL || esp_websocket_client_is_connected(ws_handle) == 0) {
 		ESP_LOGI(TAG,"Websocket not connected");
@@ -170,7 +170,8 @@ void esp_WebSocket::Websocket_Stop() {
 	esp_websocket_client_stop(ws_handle);
 }
 
-
+// This is the constructor for the esp_WebSocket class
+// It sets up the websocket client config, and calls websocket_init() to start the websocket
 esp_WebSocket::esp_WebSocket(char * url, char * endpoint, void * parentDevice) {
 	std::string uri_str = "ws://" + std::string(url) + "/" + std::string(endpoint);
 	strncpy(this->id, "000000000000000000000000000000000000", 37);

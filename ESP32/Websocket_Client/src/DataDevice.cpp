@@ -8,14 +8,14 @@
 DataDevice::DataDevice(char * url, char * endpoint, char * name) {
 	ws = new esp_WebSocket(url, endpoint, (void *) this);
 	this->name = name;
-	strncpy(this->id, "00000000-0000-0000-0000-000000000000", 37);
+	ESP_LOGI(TAG, "DataDevice created with url: %s, endpoint: %s, deviceName: %s", url, endpoint, name);
 	dr = new esp_DataReader();
 }
 
 DataDevice::DataDevice(char * url, char * endpoint, int port, char * name) {
 	ws = new esp_WebSocket(url, endpoint, port, (void *) this);
 	this->name = name;
-	strncpy(this->id, "00000000-0000-0000-0000-000000000000", 37);
+	ESP_LOGI(TAG, "DataDevice created with url: %s, endpoint: %s, deviceName: %s", url, endpoint, name);
 	dr = new esp_DataReader();
 }
 
@@ -25,16 +25,13 @@ DataDevice::~DataDevice() {
 }
 
 void DataDevice::readAndSendData() {
-	char * device_id = this->getId();
-	ESP_LOGI(TAG, "Reading data from device with id: %s", device_id);
-	StaticJsonDocument <200> doc;
-	dr->readData(doc, device_id);
+	StaticJsonDocument<200> doc;
+	dr->readData(doc, this->id);
 
-	char buffer[200];
-	serializeJson(doc, buffer);
-
-	// data_buf = "Hello World";
-	ws->WebSocket_send(buffer);
+	// send the data to the websocket server
+	char message[200];
+	serializeJson(doc, message);
+	ws->WebSocket_send(message);
 }
 
 void DataDevice::setId(const char * id) {

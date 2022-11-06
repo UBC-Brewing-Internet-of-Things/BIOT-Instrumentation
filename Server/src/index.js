@@ -16,6 +16,10 @@ var device_manager = new DeviceManager();
 function register_data_device(data) {
 	// register the device with the device manager
 	console.log("registering data device with id: " + data.id);
+
+	if 
+
+
 	device_manager.addDataDevice(data.id, data.name, data.type, this);
 }
 

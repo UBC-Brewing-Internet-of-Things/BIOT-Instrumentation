@@ -6,7 +6,7 @@
 #include "WiFiManager.c"
 
 // Constants
-char * url = "seven-flies-cry-142-179-65-220.loca.lt";
+char * url = "192.168.50.200:3001";
 char * endpoint = "";
 
 
@@ -17,7 +17,9 @@ extern "C" {
 
 void app_main() {
 
-	 //Initialize NVS
+	ESP_LOGI("main", "Starting up");
+
+	// Initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
       ESP_ERROR_CHECK(nvs_flash_erase());
@@ -25,11 +27,11 @@ void app_main() {
     }
     ESP_ERROR_CHECK(ret);
 
-	// From sample code...
+	// // From sample code...
 	ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
     wifi_init_sta();
 
-	// Init Data Device
+	// // Init Data Device
 	DataDevice * dataDevice = new DataDevice(url, endpoint, "Fermenter");
 	ESP_LOGI(TAG, "DataDevice created with url: %s, endpoint: %s, deviceName: %s", url, endpoint, "test device");
 

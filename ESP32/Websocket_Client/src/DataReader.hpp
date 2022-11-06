@@ -5,6 +5,8 @@
 #include <driver/i2c.h>
 #include "EzoSensor.hpp"
 #include "ArduinoJson.h"
+// #include "I2Cbus/include/I2Cbus.hpp"
+#include "driver/uart.h"
 
 // I2C Pins on the ESP32 are PIO 22 (SCL) and GPIO 21 (SDA)
 #define I2C_SCL 22
@@ -16,7 +18,10 @@ class esp_DataReader {
 	public:
 	esp_DataReader();
 	~esp_DataReader();
+	void loop();
 	void readData(StaticJsonDocument<200> & doc, char * id);
+	
+	uart_config_t uart_config;
 
 	private:
 	int numSensors;
@@ -24,7 +29,7 @@ class esp_DataReader {
 	EzoSensor * ph;
 	EzoSensor * temp;
 	EzoSensor * O2;
-	void prepareWSJSON(int * data, StaticJsonDocument<200> & doc, char * id);
+	void prepareWSJSON(char * data, StaticJsonDocument<200> & doc, char * id);
 };
 
 

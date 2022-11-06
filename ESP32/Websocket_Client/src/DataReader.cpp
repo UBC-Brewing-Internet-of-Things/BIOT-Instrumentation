@@ -1,28 +1,85 @@
 #include "DataReader.hpp"
 #include "ArduinoJson.h"
+#include "esp_log.h"
+#define TAG "DataReader"
+static const int RX_BUF_SIZE = 1024;
+
+#define TXD_PIN (GPIO_NUM_17)
+#define RXD_PIN (GPIO_NUM_16)
+
+#define UART UART_NUM_2
+
+
+static void tx_task(void *arg)
+{
+	char* Txdata = (char*) malloc(100);
+    // while (1) {
+    	sprintf (Txdata, "C,0 \r");
+        uart_write_bytes(UART, Txdata, strlen(Txdata));
+        vTaskDelay(2000 / portTICK_PERIOD_MS);
+    // }
+}
+
+
+static void rx_task(void *arg)
+{
+    static const char *RX_TASK_TAG = "RX_TASK";
+    esp_log_level_set(RX_TASK_TAG, ESP_LOG_INFO);
+    uint8_t* data = (uint8_t*) malloc(RX_BUF_SIZE+1);
+    // while (1) {
+        const int rxBytes = uart_read_bytes(UART, data, RX_BUF_SIZE, 500 / portTICK_RATE_MS);
+        if (rxBytes > 0) {
+            data[rxBytes] = 0;
+            ESP_LOGI(RX_TASK_TAG, "Read %d bytes: '%s'", rxBytes, data);
+        } else {
+			ESP_LOGI(RX_TASK_TAG, "No data");
+		}
+    // }
+    free(data);
+}
+
+int sendData(const char* logName, const char* data)
+{
+    const int len = 2;
+    const int txBytes = uart_write_bytes(UART, data, len);
+    ESP_LOGI(logName, "Wrote %d bytes", txBytes);
+    return txBytes;
+}
+
+int readData_h(const char* logName, char* data)
+{
+	const int rxBytes = uart_read_bytes(UART, (uint8_t*)data, 40, 500 / portTICK_RATE_MS);
+	ESP_LOGI(logName, "Read %d bytes", rxBytes);
+	return rxBytes;
+}
 
 esp_DataReader::esp_DataReader() {
-	// Initialize the I2C bus
-	i2c_config_t conf;
-	conf.mode = I2C_MODE_MASTER;
-	conf.sda_io_num = I2C_SDA;
-	conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
-	conf.scl_io_num = I2C_SCL;
-	conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
-	i2c_param_config(PORT, &conf);
+	ESP_LOGI(TAG, "Temp Sensor Created");
+	uart_config_t uart_config = {
+		9600,
+		UART_DATA_8_BITS,
+		UART_PARITY_DISABLE,
+		UART_STOP_BITS_1,
+		UART_HW_FLOWCTRL_DISABLE,
+		UART_SCLK_APB,
+	};
 
-	// Install the I2C driver ()
-	i2c_driver_install(I2C_NUM_0, conf.mode, 0, 0, 0);
-
-	// Initialize the sensor array
-	this->ph = new EzoSensor(0x63, "ph"); // 0x63 is the default address for the pH sensor
-	this->sensors[0] = this->ph;
-	this->temp = new EzoSensor(0x66, "temp"); // 0x66 is the default address for the temperature sensor
-	this->sensors[1] = this->temp;
-	this->O2 = new EzoSensor(0x61, "O2"); // 0x61 is the default address for the O2 sensor
-	this->sensors[2] = this->O2;
-	this->numSensors = 3;
+	// Configure UART parameters with error checking
+	ESP_ERROR_CHECK(uart_driver_install(UART, RX_BUF_SIZE * 2, 0, 0, NULL, 0));
+	ESP_ERROR_CHECK(uart_param_config(UART, &uart_config));
+	ESP_ERROR_CHECK(uart_set_pin(UART, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+	sendData("main", "C,0 \r");
+	ESP_LOGI(TAG, "Sensors initialized");
+	tx_task(NULL);
 }
+
+void esp_DataReader::loop() {
+	// xTaskCreate(rx_task, "uart_rx_task", 1024*2, NULL, configMAX_PRIORITIES-1, NULL);
+	rx_task(NULL);
+    // xTaskCreate(tx_task, "uart_tx_task", 1024*2, NULL, configMAX_PRIORITIES-2, NULL);
+}
+
+
 
 // TODO: Add destructor
 
@@ -30,29 +87,26 @@ esp_DataReader::esp_DataReader() {
 // TODO: refactor to use a single read function
 // TODO: add error handling
 void esp_DataReader::readData(StaticJsonDocument<200> & doc, char * id) {
-	// array of bytes to hold the sensor data
-	int * data = new int[sizeof(int) * this->numSensors*2];
+	char * data = (char*) malloc(100);
+	sendData("main", "R\r");
+	const int rxBytes = readData_h(TAG, data);
 
-
-	data[0] = rand() % 14;
-	data[1] = rand() % 100;
-	data[2] = rand() % 100;
-
-	// convert the data to JSON and store as a string in buffer
-	// TODO: device id...
+	// take only the first 6 bytes of data
+	data[6] = '\0';
+	ESP_LOGI(TAG, "Read %d bytes: '%s'", rxBytes, data);
 	prepareWSJSON(data, doc, id);
-
+	free(data);
 }
 
 // convert data to JSON and store as a string in buffer
-void esp_DataReader::prepareWSJSON(int * data, StaticJsonDocument<200> & doc, char * id) {
+void esp_DataReader::prepareWSJSON(char * data, StaticJsonDocument<200> & doc, char * id) {
 	// add the sensor data
 	char ph[5];
 	char temperature[10];
 	char dissolved_o2[10];
-	sprintf(ph, "%d", data[0]);
-	sprintf(temperature, "%d", data[1]);
-	sprintf(dissolved_o2, "%d", data[2]);
+	sprintf(ph, "%d", 0);
+	sprintf(temperature, "%s", data);
+	sprintf(dissolved_o2, "%d", 0); 
 	doc["event"] = "data_update";
 	doc["id"] = id;
 	doc["data"]["pH"] = ph;
