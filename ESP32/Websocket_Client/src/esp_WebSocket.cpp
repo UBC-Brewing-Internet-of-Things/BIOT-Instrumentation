@@ -1,4 +1,3 @@
-
 // esp32 websocket wrapper than encapsulates the websocket connection and provides a simple interface to send and receive messages
 // using the ESP espressif esp32 websocket
 

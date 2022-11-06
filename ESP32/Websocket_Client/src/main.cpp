@@ -37,6 +37,9 @@ void app_main() {
 
 	// wait for everything to connect
 	vTaskDelay(10000 / portTICK_PERIOD_MS);
+
+
+	// Main Loop
 	while (1) {
 		dataDevice->readAndSendData();
 		vTaskDelay(1000 / portTICK_PERIOD_MS);

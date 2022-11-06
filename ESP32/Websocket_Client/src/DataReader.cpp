@@ -4,12 +4,15 @@
 #define TAG "DataReader"
 static const int RX_BUF_SIZE = 1024;
 
+// CURRENTLY ONLY PH (for testing)
 #define TXD_PIN (GPIO_NUM_17)
 #define RXD_PIN (GPIO_NUM_16)
-
 #define UART UART_NUM_2
 
 
+
+// TODO: use the esp event loop to handle the data reader events
+// TX task will transmit data from the device to the connection on the TX pin
 static void tx_task(void *arg)
 {
 	char* Txdata = (char*) malloc(100);
@@ -21,6 +24,8 @@ static void tx_task(void *arg)
 }
 
 
+// TODO: use the esp event loop to handle the data reader events
+// The RX task will read data from the connection on the RX pin and send it to the device
 static void rx_task(void *arg)
 {
     static const char *RX_TASK_TAG = "RX_TASK";
@@ -38,6 +43,7 @@ static void rx_task(void *arg)
     free(data);
 }
 
+// Simple method to send data over the UART connection
 int sendData(const char* logName, const char* data)
 {
     const int len = 2;
@@ -46,6 +52,7 @@ int sendData(const char* logName, const char* data)
     return txBytes;
 }
 
+// Simple method to read data from the UART connection
 int readData_h(const char* logName, char* data)
 {
 	const int rxBytes = uart_read_bytes(UART, (uint8_t*)data, 40, 500 / portTICK_RATE_MS);
@@ -53,8 +60,14 @@ int readData_h(const char* logName, char* data)
 	return rxBytes;
 }
 
+
+// Class Constructor
+// Initializes the UART connection -> Currently only PH
+// TODO: add other sensors
 esp_DataReader::esp_DataReader() {
 	ESP_LOGI(TAG, "Temp Sensor Created");
+
+	// Config for the UART connection to the PH sensor (atlas scientific -> 9600 baud)
 	uart_config_t uart_config = {
 		9600,
 		UART_DATA_8_BITS,
@@ -68,33 +81,38 @@ esp_DataReader::esp_DataReader() {
 	ESP_ERROR_CHECK(uart_driver_install(UART, RX_BUF_SIZE * 2, 0, 0, NULL, 0));
 	ESP_ERROR_CHECK(uart_param_config(UART, &uart_config));
 	ESP_ERROR_CHECK(uart_set_pin(UART, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+	
+	// We send a command "C,0" to tell the sensor to disable continuous reading mode
+	// This generally gives us simpler control over the sensor, we tell it when to read and get a response.
+	// The default mode is continuous reading mode.
 	sendData("main", "C,0 \r");
+
 	ESP_LOGI(TAG, "Sensors initialized");
-	tx_task(NULL);
 }
 
-void esp_DataReader::loop() {
-	// xTaskCreate(rx_task, "uart_rx_task", 1024*2, NULL, configMAX_PRIORITIES-1, NULL);
-	rx_task(NULL);
-    // xTaskCreate(tx_task, "uart_tx_task", 1024*2, NULL, configMAX_PRIORITIES-2, NULL);
-}
 
 
 
 // TODO: Add destructor
 
-// TODO: perform reads in parallel?
+// TODO: perform reads in parallel? use esp event loop/queue?
 // TODO: refactor to use a single read function
 // TODO: add error handling
 void esp_DataReader::readData(StaticJsonDocument<200> & doc, char * id) {
-	char * data = (char*) malloc(100);
+	char * data = (char*) malloc(100); // we dont need this much memory, I think max is ~40 chars...
+	// "R" is the command to take a reading
 	sendData("main", "R\r");
+	// Listen on the rx pin for a response
 	const int rxBytes = readData_h(TAG, data);
 
-	// take only the first 6 bytes of data
+	// take only the first 6 bytes of data (just in case there is some garbage at the end or in the buffer...)
 	data[6] = '\0';
 	ESP_LOGI(TAG, "Read %d bytes: '%s'", rxBytes, data);
+
+	// We need to prep the data for the server in a properly formatted JSON object
 	prepareWSJSON(data, doc, id);
+
+	// Now that the data is in the JSON document, we can free the buffer
 	free(data);
 }
 
@@ -104,9 +122,11 @@ void esp_DataReader::prepareWSJSON(char * data, StaticJsonDocument<200> & doc, c
 	char ph[5];
 	char temperature[10];
 	char dissolved_o2[10];
-	sprintf(ph, "%d", 0);
+	sprintf(ph, "%d", 0); // 0 is a placeholder for now
 	sprintf(temperature, "%s", data);
-	sprintf(dissolved_o2, "%d", 0); 
+	sprintf(dissolved_o2, "%d", 0);  // 0 is a placeholder for now
+
+	// We want to send a "data_update" event to the server with our id, to let it know we have new data :D
 	doc["event"] = "data_update";
 	doc["id"] = id;
 	doc["data"]["pH"] = ph;

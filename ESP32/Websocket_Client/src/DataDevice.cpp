@@ -24,6 +24,11 @@ DataDevice::~DataDevice() {
 	delete dr;
 }
 
+// Data Device class methods
+
+
+// read data from the data reader and send it to the web socket server
+// this function expects to be called in the main loop
 void DataDevice::readAndSendData() {
 	StaticJsonDocument<200> doc;
 	dr->readData(doc, this->id);
