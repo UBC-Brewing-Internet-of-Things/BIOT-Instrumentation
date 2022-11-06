@@ -12,15 +12,17 @@ var app = express();
 
 var device_manager = new DeviceManager();
 
-
 function register_data_device(data) {
 	// register the device with the device manager
 	console.log("registering data device with id: " + data.id);
-
-	if 
-
-
+	
 	device_manager.addDataDevice(data.id, data.name, data.type, this);
+	// check if we've got an unfinished recording active for this device
+	var recording_device = device_manager.findRecordingDevice(data.name);
+	if (recording_device !== undefined) {
+		// we've got an unfinished recording, so we need to start it again on this device
+		recording_device.startRecording();
+	}
 }
 
 function register_web_client(data) {
@@ -40,6 +42,20 @@ ws_server.on("connection", socket => {
 		id: device_id
 	}));
 
+	// we set an interval for every 2s, and if the client hasn't registered, we send it the register message again
+	// if the client has registered, we clear the interval
+	var register_interval = setInterval(function() {
+		if (device_manager.findClientById(device_id) === undefined) {
+			socket.send(JSON.stringify({
+				event: "register",
+				id: device_id
+			}));
+		} else {
+			clearInterval(register_interval);
+		}
+	}, 2000);
+
+
 	console.log("new connection id " + device_id);
 	
 	socket.isAlive = true;
@@ -58,13 +74,24 @@ ws_server.on("connection", socket => {
 			socket.isAlive = true;
 			return;
 		}
-
-		const json_message = JSON.parse(message_string);
-		console.log(json_message);
+		
+		var json_message = {};
+		try {
+			json_message = JSON.parse(message_string);
+			console.log(json_message);
+		} catch (e) {
+			console.log("error parsing json: " + e);
+			return;
+		}
+		// SANITY CHECK MAKE SURE EVENT IS REGISTER
+		console.log("OHMYGOD                    " + json_message.event);
+		var sanity = json_message.event === "register_data_device";
+		console.log("SANITY CHECK" + sanity);
 
 		// check if the message is a registration message
 		// we'll handle this here so we can associate the device with the socket
 		if (json_message.event === "register_data_device") {
+			console.log("registering data device MESSAGE RECEIVED");
 			register_data_device.call(socket, json_message); // the call function allows us to set the context of the function call to the socket
 		} else if (json_message.event === 'register_web_client') {
 			register_web_client.call(socket, json_message);
@@ -80,14 +107,11 @@ ws_server.on("connection", socket => {
 });
 
 function messageDispatcher(message) {
-	if (message.event === "chat_message") {
-		// broadcast the message to all clients
-		const message_to_send = JSON.stringify({
-			event: "broadcast_chat",
-			message: message.message
-		});
-		console.log(message_to_send);
-		broadcastMessage(message_to_send);
+	
+	// if the id isn't registered, then we can't do anything with the message
+	if (device_manager.isRegistered(message.id) === false) {
+		console.log("device id " + message.id + " is not registered");
+		return;
 	}
 
 	if (message.event === "data_update") {

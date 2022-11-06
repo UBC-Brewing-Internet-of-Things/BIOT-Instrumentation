@@ -149,6 +149,7 @@ void Websocket_Event_Handler(void * event_arg, esp_event_base_t event_base, int3
 				delete message;
 				break;
 			}
+			break;
 		}
 		case WEBSOCKET_EVENT_ERROR:
 			ESP_LOGI(TAG, "Websocket error");
@@ -168,7 +169,7 @@ void esp_WebSocket::Websocket_Stop() {
 // It calls websocket_init() to start the websocket, and keeps trying until we get a connection
 esp_WebSocket::esp_WebSocket(char * url, char * endpoint, void * parentDevice) {
 	std::string uri_str = "ws://" + std::string(url) + "/" + std::string(endpoint);
-	strncpy(this->id, "000000000000000000000000000000000000", 37);
+	memset(this->id, 0, 37);
 	// initalize the ws_config
 	esp_websocket_client_config_t config = {};
 	config.uri = uri_str.c_str();
@@ -185,7 +186,7 @@ esp_WebSocket::esp_WebSocket(char * url, char * endpoint, void * parentDevice) {
 // copy constructor w/ that includes the port number, in case you need to specify a port
 esp_WebSocket::esp_WebSocket(char * url, char * endpoint, int port, void * parentDevice) {
 	std::string uri_str = "ws://" + std::string(url) + "/" + std::string(endpoint);
-	strncpy(this->id, "000000000000000000000000000000000000", 37);
+	memset(this->id, 0, 37);
 	// initalize the ws_config
 	esp_websocket_client_config_t config = {};
 	config.uri = uri_str.c_str();
@@ -197,6 +198,7 @@ esp_WebSocket::esp_WebSocket(char * url, char * endpoint, int port, void * paren
 		ESP_LOGI(TAG, "Attempting websocket init again");
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
+
 };
 
 

@@ -65,7 +65,7 @@ int readData_h(const char* logName, char* data)
 // Initializes the UART connection -> Currently only PH
 // TODO: add other sensors
 esp_DataReader::esp_DataReader() {
-	ESP_LOGI(TAG, "Temp Sensor Created");
+	ESP_LOGI(TAG, "pH Sensor Created");
 
 	// Config for the UART connection to the PH sensor (atlas scientific -> 9600 baud)
 	uart_config_t uart_config = {
@@ -84,17 +84,13 @@ esp_DataReader::esp_DataReader() {
 	
 	// We send a command "C,0" to tell the sensor to disable continuous reading mode
 	// This generally gives us simpler control over the sensor, we tell it when to read and get a response.
-	// The default mode is continuous reading mode.
+	// The default mode is continuous reading mode. The LED is blinking blue/green in continuous mode. It will be just green in UART single reading mode, and blue when taking a reading. (check docs to make sure)
 	sendData("main", "C,0 \r");
 
 	ESP_LOGI(TAG, "Sensors initialized");
 }
 
-
-
-
 // TODO: Add destructor
-
 // TODO: perform reads in parallel? use esp event loop/queue?
 // TODO: refactor to use a single read function
 // TODO: add error handling
@@ -107,8 +103,9 @@ void esp_DataReader::readData(StaticJsonDocument<200> & doc, char * id) {
 
 	// take only the first 6 bytes of data (just in case there is some garbage at the end or in the buffer...)
 	data[6] = '\0';
+	//int data_int = atoi(data); // we convert the data to an int to get rid of unwanted chars
 	ESP_LOGI(TAG, "Read %d bytes: '%s'", rxBytes, data);
-
+	//sprintf(data, "%d", data_int); // we convert the data back to a string
 	// We need to prep the data for the server in a properly formatted JSON object
 	prepareWSJSON(data, doc, id);
 

@@ -6,7 +6,7 @@
 #include "WiFiManager.c"
 
 // Constants
-char * url = "192.168.50.200:3001";
+char * url = "192.168.1.139:3001";
 char * endpoint = "";
 
 
@@ -28,7 +28,6 @@ void app_main() {
     ESP_ERROR_CHECK(ret);
 
 	// // From sample code...
-	ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
     wifi_init_sta();
 
 	// // Init Data Device
@@ -38,6 +37,14 @@ void app_main() {
 	// wait for everything to connect
 	vTaskDelay(10000 / portTICK_PERIOD_MS);
 
+	// wait for the id to be set
+	while (strcmp(dataDevice->getId(), "") == 0) {
+		ESP_LOGI(TAG, "Waiting for id to be set");
+		vTaskDelay(1000 / portTICK_PERIOD_MS);
+	}
+
+	ESP_LOGI(TAG, "Id set to: %s", dataDevice->getId());
+	
 
 	// Main Loop
 	while (1) {

@@ -6,16 +6,17 @@
 
 // Data Device class constructors
 DataDevice::DataDevice(char * url, char * endpoint, char * name) {
+	memset(this->id, 0, 37);
 	ws = new esp_WebSocket(url, endpoint, (void *) this);
 	this->name = name;
-	ESP_LOGI(TAG, "DataDevice created with url: %s, endpoint: %s, deviceName: %s", url, endpoint, name);
 	dr = new esp_DataReader();
 }
 
 DataDevice::DataDevice(char * url, char * endpoint, int port, char * name) {
+	// initialize id to all 0's (36 characters + 1 for null terminator)
+	memset(this->id, 0, 37);
 	ws = new esp_WebSocket(url, endpoint, port, (void *) this);
 	this->name = name;
-	ESP_LOGI(TAG, "DataDevice created with url: %s, endpoint: %s, deviceName: %s", url, endpoint, name);
 	dr = new esp_DataReader();
 }
 

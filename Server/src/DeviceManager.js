@@ -127,6 +127,11 @@ class DeviceManager {
 		}
 	}
 
+	// is device registered?
+	isRegistered(id) {
+		return this.DataDevices.find(device => device.id === id) !== undefined;
+	}
+
 	getDataDevice(id) {
 		return this.DataDevices.find(device => device.id === id);
 	}
@@ -136,6 +141,7 @@ class DeviceManager {
 	}
 	
 	findClientById(id) {
+		console.log(this.DataDevices);
 		return this.DataDevices.find(device => device.id === id) || this.WebClientDevices.find(device => device.id === id);
 	}
 
