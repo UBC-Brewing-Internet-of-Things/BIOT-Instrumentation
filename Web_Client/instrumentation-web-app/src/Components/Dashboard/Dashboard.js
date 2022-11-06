@@ -89,6 +89,8 @@ function Dashboard() {
 				console.log("No devices connected to server");
 				return;
 			}
+
+			// if the device_list is empty then
 			
 		    for (var device_json of message_json.data_devices) {
 				const id = device_json.id;
@@ -98,6 +100,11 @@ function Dashboard() {
 					console.log("device already exists");
 					return;
 				}
+
+				// check if device name is already in devices 
+				devices.filter((device) => device.name === device_json.name);
+
+
 				const temp_devices = [...devices];
 				const device_proto = {
 					id: device_json.id,
@@ -127,6 +134,8 @@ function Dashboard() {
 			}
 			if (device === undefined) {
 				console.log("device not found");
+				const json = {"event":"get_data_devices"};
+				socket.send(json.toString());
 				return;
 			}
 			const temp_devices = [...devices];
@@ -144,7 +153,7 @@ function Dashboard() {
 			// add the component to the device_list
 
 			// check if the device is already in devices
-			var device = devices.find(device => device.id === message_json.id);
+			var device = devices.find(device => device.name === message_json.name);
 			if (device !== undefined) {
 				console.log("device already exists");
 				return;

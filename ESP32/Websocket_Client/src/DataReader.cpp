@@ -119,8 +119,8 @@ void esp_DataReader::prepareWSJSON(char * data, StaticJsonDocument<200> & doc, c
 	char ph[5];
 	char temperature[10];
 	char dissolved_o2[10];
-	sprintf(ph, "%d", 0); // 0 is a placeholder for now
-	sprintf(temperature, "%s", data);
+	sprintf(ph, "%s", data); // 0 is a placeholder for now
+	sprintf(temperature, "%d", 0);
 	sprintf(dissolved_o2, "%d", 0);  // 0 is a placeholder for now
 
 	// We want to send a "data_update" event to the server with our id, to let it know we have new data :D
