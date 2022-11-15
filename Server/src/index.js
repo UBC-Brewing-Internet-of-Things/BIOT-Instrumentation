@@ -30,12 +30,12 @@ function register_web_client(data) {
 	console.log("registering web client with id: " + data.id);
 	device_manager.addWebClientDevice(data.id, data.name, data.type, this);
 	// send the client a list of data devices
-	var message_to_send = {
-		event: "data_device_list",
-		devices: device_manager.getDataDevices()
-	};
-	message_to_send = JSON.stringify(message_to_send);
-	this.send(message_to_send);
+	// var message_to_send = {
+	// 	event: "data_device_list",
+	// 	devices: device_manager.getDataDevices()
+	// };
+	// message_to_send = JSON.stringify(message_to_send);
+	// this.send(message_to_send);
 }
 
 const ws_server = new ws.Server({ noServer: true });
@@ -173,6 +173,7 @@ server.on('upgrade', (request, socket_obj, head) => {
 });
 
 // when visiting the root of the server, display a list of the devices
+// mostly just a good way to test if the server is up and running
 app.get('/', function (req, res) {
 	res.send(device_manager.getDeviceList());
 });
@@ -185,6 +186,12 @@ function ping() {
 			if (device !== undefined) {
 				console.log("removing device: " + device.id);
 				device_manager.removeDeviceBySocket(ws);
+					// broadcast to web clients that the device has disconnected
+					const disconnected_client = {
+						event: "device_disconnected",
+						id: device.id
+					};
+					broadcastToWebClients(JSON.stringify(disconnected_client));
 			}
 			return ws.terminate();
 		}

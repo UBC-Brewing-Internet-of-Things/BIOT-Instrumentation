@@ -43,7 +43,7 @@ function DataChart(props) {
 	}
 
 	// number of points to display on the chart
-	const max_points = 10;
+	const max_points = 50;
 	const [points, setPoints] = useState(0);
 	const chartRef = useRef(null);
 

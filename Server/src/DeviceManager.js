@@ -124,6 +124,8 @@ class DeviceManager {
 		if (device !== undefined) {
 			if (device.type === "data_device") {
 				this.removeDataDevice(device.id);
+
+
 			} else if (device.type === "web_client") {
 				this.removeWebClientDevice(device.id);
 			}

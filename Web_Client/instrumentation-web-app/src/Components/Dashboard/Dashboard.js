@@ -56,7 +56,13 @@ function Dashboard() {
 				type: "Web Client" 
 			})
 			socket.send(response);
-	
+			
+			// We request the list of devices
+			const request = JSON.stringify({
+				event: "get_data_devices",
+				id: message_json.id
+			});
+			socket.send(request);
 
 			// we need a list of devices to display on the dashboard to get started, so we set a short interval to request the list of devices from the server
 			// if the device list is populated, we clear the interval
