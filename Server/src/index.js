@@ -1,4 +1,11 @@
 
+// IMPORTs
+const ws = require('ws');
+const express = require('express');
+const app = express();
+const {v4: uuidv4} = require("uuid");
+const DeviceManager = require("./DeviceManager.js");
+
 
 // WEBSOCKET SERVER
 // This is the websocket server that handles all the websocket connections
@@ -7,16 +14,72 @@
 // Currently implemented is a data device type, which is a device that reads data from sensors and sends them to the server through a websocket connection
 
 
-// ------------------ SERVER SETUP ------------------
-const ws = require('ws');
-const express = require('express');
-const app = express();
+// ------------------ Event handling ------------------
+// We register events before starting the server up
+// Here we implement our custom API for handling events
+// A device has a class of functionality. For each functionality, we register a handler function
+const event_handlers = {
+	// Data Device Events
+	data_update: {},
 
+	// Web client events
+	get_data_devices: {},
+	start_recording: {},
+	stop_recording: {},
+};
+
+function registerCallback(event, callback) {
+	event_handlers[event] = callback;
+}
+
+function registerCallbacks() {
+	registerCallback("data_update", data_update);
+	registerCallback("get_data_devices", get_data_devices);
+	registerCallback("start_recording", start_recording);
+	registerCallback("stop_recording", stop_recording);
+}
+
+function messageDispatcher(message) {
+	// if the device is not registered, we ignore the message
+	if (device_manager.findClientById(message.id) === undefined) {
+		console.log("device not registered");
+		return;
+	}
+
+	// get the function associated with the message type
+	const message_function = event_handlers[message.event];
+	// call the function
+	if (message_function !== undefined) {
+		message_function(message);
+	} else {
+		console.log("no function associated with message type: " + message.event);
+	}
+}
 
 registerCallbacks();
 
+
+// ------------------ SERVER SETUP ------------------
 // see https://www.npmjs.com/package/ws#multiple-servers-sharing-a-single-https-server
 const ws_server = new ws.Server({ noServer: true });
+
+const server = app.listen(3001);
+
+// When a client makes a http:// upgrade request to the express server,
+//  we use the ws_server object to handle the upgrade to the ws:// 
+server.on('upgrade', (request, socket_obj, head) => {
+	ws_server.handleUpgrade(request, socket_obj, head, socket => {
+		ws_server.emit('connection', socket, request);
+	});
+});
+
+// testing purposes...
+app.get('/', function (req, res) {
+	res.send(device_manager.getDeviceList());
+});
+
+
+// ------------------ Websocket Message Handling ------------------
 ws_server.on("connection", socket => {
 
 	// Every device connected to the server gets a UUID
@@ -82,47 +145,6 @@ ws_server.on("connection", socket => {
 	});
 
 });
-
-// ------------------ Event handling ------------------
-// Here we implement our custom API for handling events
-// A device has a class of functionality. For each functionality, we register a handler function
-const event_handlers = {
-	// Data Device Events
-	data_update: {},
-
-	// Web client events
-	get_data_devices: {},
-	start_recording: {},
-	stop_recording: {},
-};
-
-function registerCallback(event, callback) {
-	event_handlers[event] = callback;
-}
-
-function registerCallbacks() {
-	registerCallback("data_update", data_update);
-	registerCallback("get_data_devices", get_data_devices);
-	registerCallback("start_recording", start_recording);
-	registerCallback("stop_recording", stop_recording);
-}
-
-function messageDispatcher(message) {
-	// if the device is not registered, we ignore the message
-	if (device_manager.findClientById(message.id) === undefined) {
-		console.log("device not registered");
-		return;
-	}
-
-	// get the function associated with the message type
-	const message_function = event_handlers[message.event];
-	// call the function
-	if (message_function !== undefined) {
-		message_function(message);
-	} else {
-		console.log("no function associated with message type: " + message.event);
-	}
-}
 
 // ------------------ Event Callbacks ------------------
 // TODO: move these to device class or separate file?
@@ -190,5 +212,3 @@ function register_web_client(data) {
 	// message_to_send = JSON.stringify(message_to_send);
 	// this.send(message_to_send);
 }
-
-// 
