@@ -1,72 +1,6 @@
 // A simple system to manage the list of esp devices connected to the websocket
-const DataWriter = require('./DataWriter.js');
-
-
-class DataDevice {
-	constructor(id, name, type, socket, parent) {
-		this.id = id;
-		this.name = name;
-		this.type = type;
-		this.socket = socket;
-		this.data = {
-			temperature: 0,
-			pH: 0,
-			dissolved_o2: 0
-		};
-		this.recordingInterval = null;
-		this.recordingResolution = 30000; // 30 seconds
-		this.parent = parent;
-	}	
-
-	updateData(temp, pH, dissolved_o2) {
-		this.data.temperature = temp || 0;
-		this.data.pH = pH || 0;
-		this.data.dissolved_o2 = dissolved_o2 || 0;
-	}
-
-	startRecording() {
-		this.recording = true;
-		const filename = this.name + "_" + Date.now() + ".csv";
-		var DataWriter_v = new DataWriter(filename);
-		console.log("starting recording to " + filename);
-
-		// if this device disconnects, and rejoins with the same name
-		// we need to stop the recording for the old device
-		// and start recording for the new device
-		var prev_device = this.parent.findRecordingDevice(this.name);
-		if (prev_device !== undefined) {
-			prev_device.stopRecording();
-		}
-		// remove prev device from the list of recording devices
-		this.parent.removeRecordingDevice(this.name);
-		// add this device to the list of recording devices
-		this.parent.addRecordingDevice(this.name, this);
-
-		this.recordingInterval = setInterval(() => {
-		    var data_to_write = {
-				time: Date.now(),
-				temperature: this.data.temperature,
-				pH: this.data.pH,
-				dissolved_o2: this.data.dissolved_o2
-			};
-
-			DataWriter_v.writeData(data_to_write);
-		}, this.recordingResolution);
-	}
-
-	stopRecording() {
-		if (this.recordingInterval !== null) {
-			clearInterval(this.recordingInterval);
-			this.recordingInterval = null;
-			// remove from the list of recording devices
-			this.parent.removeRecordingDevice(this.name);
-			console.log("stopped recording");
-		} else {
-			console.log("no recording to stop");
-		}
-	}
-
-}
+const DataDevice = require('./DataDevice.js');
+const WebClient = require('./WebClient.js');
 
 class DeviceManager {
 	constructor() {
@@ -77,6 +11,14 @@ class DeviceManager {
 
 	addDataDevice(id, name, type, socket) {
 		const device = new DataDevice(id, name, type, socket, this);
+		
+		// Check if device with the same name is registered
+		// If so, remove it and add the new device
+		var prev_device = this.DataDevices.find(device => device.name === name);
+		if (prev_device !== undefined) {
+			this.removeDataDevice(prev_device.id);
+		}
+
 		this.DataDevices.push(device);
 		const new_client = {
 			event: "new_device",
@@ -95,7 +37,7 @@ class DeviceManager {
 	}
 
 	addWebClientDevice(id, name, type, socket) {
-		const device = new DataDevice(id, name, type, socket, this);
+		const device = new WebClient(id, name, type, socket, this);
 		this.WebClientDevices.push(device);
 	}
 

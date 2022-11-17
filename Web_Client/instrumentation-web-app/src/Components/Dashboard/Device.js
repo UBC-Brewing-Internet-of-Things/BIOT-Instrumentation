@@ -68,16 +68,25 @@ function Device(props) {
 		}
 	}	
 
+	// When we collapse, we want to store the current state of the charts
+	// When we expand, we want to restore the state of the charts
+	// TODO
+	function handleExpanded() {
+
+
+
+		setExpanded(expanded => !expanded);
+	}
+
+
 	
-
-
 	// TODO: (??) Lift the logic for updating the charts to the parent component
 	// see below
 
 	return (
 		<div className="device" style={style_object.device}>
 			{/* Device name + id */}	
-			<div className="collapsed-view" style={style_object.collapsed_view} onClick={() => setExpanded(expanded => !expanded)}>
+			<div className="collapsed-view" style={style_object.collapsed_view} onClick={handleExpanded()}>
 				<div className="device_details" style ={style_object.device_details}>
 					<p className="data_title" style={style_object.data_title}>{name}</p>
 					<p className="data_id" style={style_object.data_id}>id:{id}</p>

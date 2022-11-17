@@ -1,4 +1,3 @@
-
 const express = require('express');
 const ws = require("ws");
 
@@ -23,7 +22,6 @@ ws_server.on("connection", (socket) => {
 });
 
 // handle http request
-
 const server = app.listen(3002);
 
 server.on('upgrade', (request, socket_obj, head) => {
