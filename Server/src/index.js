@@ -106,6 +106,12 @@ ws_server.on("connection", socket => {
 
 	// When the server receives a message from a device, we parse it and handle it
 	socket.on("message", message => {
+		// check for null message
+		if (!message) {
+			console.log("null message received");
+			return;
+		}
+		
 		// convert the message from a buffer of bytes to a string
 		var message_string = "";	
 		try {
@@ -130,6 +136,11 @@ ws_server.on("connection", socket => {
 			console.log(json_message);
 		} catch (e) {
 			console.log("error parsing json: " + e);
+			return;
+		}
+
+		if (!json_message) {
+			console.log("null json message received");
 			return;
 		}
 				// check if the message is a registration message

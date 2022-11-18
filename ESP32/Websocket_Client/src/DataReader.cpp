@@ -10,8 +10,8 @@ static const int RX_BUF_SIZE = 1024;
 #define UART UART_NUM_2
 
 // Temperature
-#define TXD_PIN_TEMP (GPIO_NUM_10)
-#define RXD_PIN_TEMP (GPIO_NUM_9)
+#define TXD_PIN_TEMP (GPIO_NUM_1)
+#define RXD_PIN_TEMP (GPIO_NUM_3)
 #define UART_TEMP UART_NUM_1
 
 

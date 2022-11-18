@@ -34,6 +34,9 @@ void DataDevice::readAndSendData() {
 	StaticJsonDocument<200> doc;
 	dr->readData(doc, this->id);
 
+	// small vtask delay to prevent the watchdog timer from triggering
+	vTaskDelay(10 / portTICK_PERIOD_MS);
+
 	// send the data to the websocket server
 	char message[200];
 	serializeJson(doc, message);

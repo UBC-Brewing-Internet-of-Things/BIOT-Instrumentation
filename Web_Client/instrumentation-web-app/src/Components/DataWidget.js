@@ -31,7 +31,16 @@ function DataWidget(props) {
 		return angle - Math.PI/2 + 0.00001;
 	}
 
-	const value = props.value;
+	var value = props.value;
+
+	// if we can parse to a float, we round to 2 decimal places
+	// otherwise, just show the string (might be an error reading)
+	if (parseFloat(value)) {
+		value = parseFloat(value);
+		value = value.toFixed(2);
+	}
+
+
 	const name = props.name;
 	const units = props.units;
 	//var previous_value = useRef(0);
@@ -112,11 +121,10 @@ var style_object = {
 		border: "7px solid #a6a6a6",
 	},
 	data_widget_value: {
-		fontSize: "70px",
+		fontSize: "60px",
 		fontFamily: "Roboto Medium",
 		position: "relative",
-		top: "10%",
-		margin: "10%"
+		top: "10%"
 	},
 	data_widget_units: {
 		fontSize: "10px",
@@ -128,7 +136,7 @@ var style_object = {
 		fontFamily: "Roboto Light",
 		fontWeight: "light",
 		position: "relative",
-		top: "-10%"
+		top: "-40%"
 	},
 	data_widget_div: {
 		display: "flex",
