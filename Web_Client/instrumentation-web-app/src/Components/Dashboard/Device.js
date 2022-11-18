@@ -57,12 +57,14 @@ function Device(props) {
 				event: "start_recording",
 				id: id,
 			}));
+			buttonRef.current.innerHTML = "Stop Recording";
 			setStartStop(true);
 		} else {
 			socket.send(JSON.stringify({
 				event: "stop_recording",
 				id: id,
 			}));
+			buttonRef.current.innerHTML = "Start Recording";
 			setStartStop(false);
 		}
 	}	
