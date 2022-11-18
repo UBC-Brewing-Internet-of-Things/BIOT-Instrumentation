@@ -5,8 +5,11 @@ class DataWriter {
 	// Creates a new fs write stream and writes the header to the file
 	constructor(filename) {
 		this.filename = filename;
-		this.writeStream = fs.createWriteStream(filename);
-		this.writeStream.write("time,temperature,pH,dissolved_o2\n");
+		fs.appendFile(filename,"recording_start,time,temperature,pH,dissolved_o2\n,true,0,0,0,0\n", function(err) {
+			if (err) {
+				return console.log(err);
+			}
+		});
 	}
 
 	
@@ -21,7 +24,12 @@ class DataWriter {
 	*/
 	writeData(data) {
 		// write the data to the file
-		this.writeStream.write(data.time + "," + data.temperature + "," + data.pH + "," + data.dissolved_o2 + "\n");
+		const to_write = "false" + "," + data.time + "," + data.temperature + "," + data.pH + "," + data.dissolved_o2 + "\n";
+		fs.appendFile(this.filename, to_write, function(err) {
+			if (err) {
+				return console.log(err);
+			}
+		});
 	}
 
 	close() {

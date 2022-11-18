@@ -36,6 +36,7 @@ int sendData(const char* logName, const char* data, uart_port_t uart_num) {
 int readData_h(const char* logName, char* data, uart_port_t uart_num)
 {
 	// Read data from the UART
+	ESP_LOGI(logName, "Reading data");
 	const int rxBytes = uart_read_bytes(uart_num, (uint8_t*) data, RX_BUF_SIZE, 1000 / portTICK_RATE_MS);
 	// Print the data if we read any
 	if (rxBytes > 0) {
@@ -84,7 +85,8 @@ void app_main() {
 	ESP_ERROR_CHECK(uart_param_config(UART_NUM_0, &uart_config_computer));
 	ESP_ERROR_CHECK(uart_set_pin(UART_NUM_0, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 
-
+	// disable continuous reading
+	sendData("sensor", "C,0", UART);
 
 	while (1) {
 		char data[40];

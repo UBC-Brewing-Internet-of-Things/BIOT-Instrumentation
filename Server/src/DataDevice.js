@@ -11,6 +11,7 @@ class DataDevice extends Client {
 		};
 		this.recordingInterval = null;
 		this.recordingResolution = 30000; // 30 seconds
+		this.recording = false;
 	}	
 
 	updateData(temp, pH, dissolved_o2) {
@@ -21,7 +22,7 @@ class DataDevice extends Client {
 
 	startRecording() {
 		this.recording = true;
-		const filename = this.name + "_" + Date.now() + ".csv";
+		const filename = this.name + ".csv";
 		var DataWriter_v = new DataWriter(filename);
 		console.log("starting recording to " + filename);
 
@@ -43,11 +44,12 @@ class DataDevice extends Client {
 	}
 
 	stopRecording() {
-		if (this.recordingInterval !== null) {
+		if (this.recording) {
 			clearInterval(this.recordingInterval);
 			this.recordingInterval = null;
+			this.recording = false;
 			// remove from the list of recording devices
-			this.parent.removeRecordingDevice(this.name);
+			this.device_manager.removeRecordingDevice(this.name);
 			console.log("stopped recording");
 		} else {
 			console.log("no recording to stop");

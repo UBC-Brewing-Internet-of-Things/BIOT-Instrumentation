@@ -61,18 +61,13 @@ class DeviceManager {
 		this.recordingDevices.push(device);
 	}
 
-	removeDeviceBySocket(socket) {
-		const device = this.findClientBySocket(socket);
+	removeClient(device) {
+		console.log(device);
 		if (device !== undefined) {
-			if (device.type === "data_device") {
-				this.removeDataDevice(device.id);
-
-
-			} else if (device.type === "web_client") {
-				this.removeWebClientDevice(device.id);
-			}
-			
+			this.removeDataDevice(device.id);
+			this.removeWebClientDevice(device.id);
 		}
+		console.log(this.getDeviceList());
 	}
 
 	// is device registered?
@@ -111,7 +106,8 @@ class DeviceManager {
 		this.broadcastToWebClients(JSON.stringify({
 			event: "device_update",
 			id: id,
-			data: data
+			data: data,
+			recording: device.recording
 		}));
 	}
 
@@ -126,7 +122,8 @@ class DeviceManager {
 					temperature: device.data.temperature,
 					pH: device.data.pH,
 					dissolved_o2: device.data.dissolved_o2
-				}
+				},
+				recording: device.recording
 			});
 		});
 		this.WebClientDevices.forEach(device => {
@@ -138,7 +135,6 @@ class DeviceManager {
 		});
 
 		return devices;
-	
 	}	
 
 	getDataDevices() {
@@ -152,7 +148,8 @@ class DeviceManager {
 					temperature: device.data.temperature,
 					pH: device.data.pH,
 					dissolved_o2: device.data.dissolved_o2
-				}
+				},
+				recording: device.recording
 			}
 			devices.push(device_info);
 		});

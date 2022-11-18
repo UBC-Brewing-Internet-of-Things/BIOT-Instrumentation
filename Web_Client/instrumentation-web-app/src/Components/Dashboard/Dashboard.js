@@ -91,24 +91,27 @@ function Dashboard() {
 
 			// first we check if the device_list from the server is empty
 			// if it is, we don't need to do anything
-			if (message_json.devices.length === 0) {
+
+
+			if (!message_json.devices) {
 				console.log("No devices connected to server");
 				return;
 			}
 
 			// if the device_list is empty then
 			
-		    for (var device_json of message_json.data_devices) {
+		    for (var device_json of message_json.devices) {
 				const id = device_json.id;
 				// check if the device is already in devices
 				var device = devices.find((device) => device.id === id);
 				if (device !== undefined) {
 					console.log("device already exists");
+					// if the device is already in devices, we update the device to match the new id
 					return;
 				}
-
+				const name = device_json.name;
 				// check if device name is already in devices 
-				devices.filter((device) => device.name === device_json.name);
+				setDevices(devices.filter((device) => device.name !== name));
 
 
 				const temp_devices = [...devices];
@@ -116,7 +119,8 @@ function Dashboard() {
 					id: device_json.id,
 					name: device_json.name,
 					type: device_json.type,
-					data: device_json.data
+					data: device_json.data,
+					recording: device_json.recording
 				}
 				temp_devices.push(device_proto);
 				setDevices(temp_devices);
@@ -147,6 +151,7 @@ function Dashboard() {
 			const temp_devices = [...devices];
 			const device_index = temp_devices.findIndex((device) => device.id === id);
 			temp_devices[device_index].data = message_json.data;
+			temp_devices[device_index].recording = message_json.recording;
 			setDevices(temp_devices);
 		}
 	};
@@ -159,18 +164,24 @@ function Dashboard() {
 			// add the component to the device_list
 
 			// check if the device is already in devices
-			var device = devices.find(device => device.name === message_json.name);
-			if (device !== undefined) {
+			const name = message_json.name;
+			const temp_devices2 = [...devices];
+			const device_index = temp_devices2.findIndex((device) => device.name === name);
+			if (device_index !== -1) {
 				console.log("device already exists");
+				temp_devices2[device_index].id = message_json.id; // we just update the existing device with the new id
+				setDevices(temp_devices2);
 				return;
 			}
-			const temp_devices = [...devices];
+
+			const temp_devices = [...devices];	
 
 			var device_proto = {
 				id: message_json.id,
 				name: message_json.name,
 				type: message_json.type,
-				data: message_json.data
+				data: message_json.data,
+				recording: message_json.recording
 			}
 			temp_devices.push(device_proto);
 			setDevices(temp_devices);
@@ -182,11 +193,10 @@ function Dashboard() {
 		console.log("device disconnected with id: " + message_json.id);
 		if (message_json.event === "device_disconnected") {
 			// remove the device with the matching id from the device list
-			var device = devices.find(device => device.id === message_json.id);
-			var index = devices.indexOf(device);
-			if (index > -1) {
-				devices.splice(index, 1);
-			}
+			const temp_devices = [...devices];
+			const device_index = temp_devices.findIndex((device) => device.id === message_json.id);
+			temp_devices.splice(device_index, 1);
+			setDevices(temp_devices);
 		}
 
 	}
@@ -219,7 +229,7 @@ function Dashboard() {
 	}, [socket]);
 
 
-	devices.map(device => {devices_rendered.push(<Device key={device.id} id={device.id} name={device.name} type={device.type} data={device.data} />)});
+	devices.map(device => {devices_rendered.push(<Device key={device.id} id={device.id} name={device.name} type={device.type} data={device.data} recording={device.recording}/>)});
 
 	// We'll ask for a new list of devices every minute
 	// This is to ensure that the list is up to date in case a device is added or removed

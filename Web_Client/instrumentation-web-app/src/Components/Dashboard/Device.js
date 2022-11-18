@@ -16,6 +16,7 @@ function Device(props) {
 	const name = props.name;
 	const id = props.id;
 	let data = useRef(props.data);
+	let recording = props.recording;
 	data.current = props.data;
 	
 
@@ -44,39 +45,35 @@ function Device(props) {
 		}, interval_length);
 
 		return () => clearInterval(interval);
-	}, []);
+	}, [interval_length, data]);
 
-	const [recording, setRecording] = useState(false);
+	const [startstop, setStartStop] = useState(false);
 	const buttonRef = useRef(null);
 
 	function handleRecordingClick() {
 		console.log("Recording button clicked");
-		if (!recording) {
+		if (!startstop) {
 			socket.send(JSON.stringify({
 				event: "start_recording",
 				id: id,
 			}));
-			buttonRef.current.innerHTML = "Stop Recording";
-			setRecording(true);
+			setStartStop(true);
 		} else {
 			socket.send(JSON.stringify({
 				event: "stop_recording",
 				id: id,
 			}));
-			buttonRef.current.innerHTML = "Start Recording";
-			setRecording(false);
+			setStartStop(false);
 		}
 	}	
 
 	// When we collapse, we want to store the current state of the charts
 	// When we expand, we want to restore the state of the charts
 	// TODO
-	function handleExpanded() {
+	// function handleExpanded() {
 
-
-
-		setExpanded(expanded => !expanded);
-	}
+	// 	setExpanded(expanded => !expanded);
+	// }
 
 
 	
@@ -86,7 +83,7 @@ function Device(props) {
 	return (
 		<div className="device" style={style_object.device}>
 			{/* Device name + id */}	
-			<div className="collapsed-view" style={style_object.collapsed_view} onClick={handleExpanded()}>
+			<div className="collapsed-view" style={style_object.collapsed_view} onClick={() => {setExpanded(expanded => !expanded)}}>
 				<div className="device_details" style ={style_object.device_details}>
 					<p className="data_title" style={style_object.data_title}>{name}</p>
 					<p className="data_id" style={style_object.data_id}>id:{id}</p>
@@ -116,7 +113,8 @@ function Device(props) {
 						<DataChart name="temperature" value={tempref.current} units="°C" id={id} />
 						<DataChart name="dissolved_o2" value={o2ref.current} units="ppm" id={id} />
 				</div>
-				<button ref={buttonRef}className="record_button" style={style_object.record_button} onClick={() => handleRecordingClick()}>Start Recording</button>
+				<button ref={buttonRef}className="record_button" style={style_object.record_button} onClick={() => handleRecordingClick()}>Toggle Recording</button>
+				<p className="recording_status" style={style_object.recording_status}>{recording === true ? "Recording" : "Not recording"}</p>
 				</>
 			}
 	</div>

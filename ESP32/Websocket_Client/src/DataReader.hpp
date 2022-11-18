@@ -29,7 +29,7 @@ class esp_DataReader {
 	EzoSensor * ph;
 	EzoSensor * temp;
 	EzoSensor * O2;
-	void prepareWSJSON(char * data, StaticJsonDocument<200> & doc, char * id);
+	void prepareWSJSON(char * data_ph, char * data_temp, StaticJsonDocument<200> & doc, char * id);
 };
 
 

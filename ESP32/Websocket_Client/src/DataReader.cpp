@@ -4,11 +4,15 @@
 #define TAG "DataReader"
 static const int RX_BUF_SIZE = 1024;
 
-// CURRENTLY ONLY PH (for testing)
+// PH
 #define TXD_PIN (GPIO_NUM_17)
 #define RXD_PIN (GPIO_NUM_16)
 #define UART UART_NUM_2
 
+// Temperature
+#define TXD_PIN_TEMP (GPIO_NUM_10)
+#define RXD_PIN_TEMP (GPIO_NUM_9)
+#define UART_TEMP UART_NUM_1
 
 
 // TODO: use the esp event loop to handle the data reader events
@@ -44,18 +48,18 @@ static void rx_task(void *arg)
 }
 
 // Simple method to send data over the UART connection
-int sendData(const char* logName, const char* data)
+int sendData(const char* logName, const char* data, int UART_use)
 {
     const int len = 2;
-    const int txBytes = uart_write_bytes(UART, data, len);
+    const int txBytes = uart_write_bytes(UART_use, data, len);
     ESP_LOGI(logName, "Wrote %d bytes", txBytes);
     return txBytes;
 }
 
 // Simple method to read data from the UART connection
-int readData_h(const char* logName, char* data)
+int readData_h(const char* logName, char* data, int UART_use)
 {
-	const int rxBytes = uart_read_bytes(UART, (uint8_t*)data, 40, 500 / portTICK_RATE_MS);
+	const int rxBytes = uart_read_bytes(UART_use, (uint8_t*)data, 40, 500 / portTICK_RATE_MS);
 	ESP_LOGI(logName, "Read %d bytes", rxBytes);
 	return rxBytes;
 }
@@ -85,7 +89,17 @@ esp_DataReader::esp_DataReader() {
 	// We send a command "C,0" to tell the sensor to disable continuous reading mode
 	// This generally gives us simpler control over the sensor, we tell it when to read and get a response.
 	// The default mode is continuous reading mode. The LED is blinking blue/green in continuous mode. It will be just green in UART single reading mode, and blue when taking a reading. (check docs to make sure)
-	sendData("main", "C,0 \r");
+	sendData("main", "C,0 \r", UART);
+	//sendData("main", "Find \r", UART); // make the light flash white so we know it's listening....
+
+	// ESP_LOGI(TAG, "Temperature Sensor Created");
+
+	// ESP_ERROR_CHECK(uart_driver_install(UART_TEMP, RX_BUF_SIZE * 2, 0, 0, NULL, 0));
+	// ESP_ERROR_CHECK(uart_param_config(UART_TEMP, &uart_config));
+	// ESP_ERROR_CHECK(uart_set_pin(UART_TEMP, TXD_PIN_TEMP, RXD_PIN_TEMP, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+
+	// sendData("main", "C,0 \r", UART_TEMP);
+	//sendData("main", "Find \r", UART_TEMP); // make the light flash white so we know whats up
 
 	ESP_LOGI(TAG, "Sensors initialized");
 }
@@ -95,32 +109,38 @@ esp_DataReader::esp_DataReader() {
 // TODO: refactor to use a single read function
 // TODO: add error handling
 void esp_DataReader::readData(StaticJsonDocument<200> & doc, char * id) {
-	char * data = (char*) malloc(100); // we dont need this much memory, I think max is ~40 chars...
+	char data_ph[10]; // we dont need this much memory, I think max is ~40 chars...
 	// "R" is the command to take a reading
-	sendData("main", "R\r");
+	sendData("main", "R\r", UART);
 	// Listen on the rx pin for a response
-	const int rxBytes = readData_h(TAG, data);
+	const int rxBytes = readData_h(TAG, data_ph, UART);
 
 	// take only the first 6 bytes of data (just in case there is some garbage at the end or in the buffer...)
-	data[6] = '\0';
+	data_ph[5] = '\0';
 	//int data_int = atoi(data); // we convert the data to an int to get rid of unwanted chars
-	ESP_LOGI(TAG, "Read %d bytes: '%s'", rxBytes, data);
+	ESP_LOGI(TAG, "Read %d bytes: '%s'", rxBytes, data_ph);
 	//sprintf(data, "%d", data_int); // we convert the data back to a string
 	// We need to prep the data for the server in a properly formatted JSON object
-	prepareWSJSON(data, doc, id);
+
+	char data_temp[10] = "0.00"; // we dont need this much memory, I think max is ~40 chars...
+	// sendData("main", "R\r", UART_TEMP);
+	// const int rxBytes_temp = readData_h(TAG, data_temp, UART_TEMP);
+	// data_temp[6] = '\0';
+	// ESP_LOGI(TAG, "Read %d bytes: '%s'", rxBytes_temp, data_temp);
+
+	prepareWSJSON(data_ph, data_temp, doc, id);
 
 	// Now that the data is in the JSON document, we can free the buffer
-	free(data);
 }
 
 // convert data to JSON and store as a string in buffer
-void esp_DataReader::prepareWSJSON(char * data, StaticJsonDocument<200> & doc, char * id) {
+void esp_DataReader::prepareWSJSON(char * data_ph, char * data_temp, StaticJsonDocument<200> & doc, char * id) {
 	// add the sensor data
-	char ph[5];
+	char ph[10];
 	char temperature[10];
 	char dissolved_o2[10];
-	sprintf(ph, "%s", data); // 0 is a placeholder for now
-	sprintf(temperature, "%d", 0);
+	sprintf(ph, "%s", data_ph); // 0 is a placeholder for now
+	sprintf(temperature, "%s", data_temp);
 	sprintf(dissolved_o2, "%d", 0);  // 0 is a placeholder for now
 
 	// We want to send a "data_update" event to the server with our id, to let it know we have new data :D

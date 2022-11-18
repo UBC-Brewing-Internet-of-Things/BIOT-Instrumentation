@@ -193,7 +193,7 @@ function ping() {
 					};
 					broadcastToWebClients(JSON.stringify(disconnected_client));
 			}
-			return ws.terminate();
+			ws.terminate();
 		}
 		// every 30s we set the isAlive flag to false, and then ping the client
 		ws.isAlive = false;

@@ -78,7 +78,6 @@ app.get('/', function (req, res) {
 	res.send(device_manager.getDeviceList());
 });
 
-
 // ------------------ Websocket Message Handling ------------------
 ws_server.on("connection", socket => {
 
@@ -143,8 +142,28 @@ ws_server.on("connection", socket => {
 			messageDispatcher(json_message);
 		}
 	});
+	socket.on("close", () => {
+		console.log("connection closed");
+		//handleDisconnect(socket);
+	});
 
 });
+
+
+function handleDisconnect(ws) {
+	device = device_manager.findClientBySocket(ws);
+	if (device !== undefined) {
+		console.log("removing device here: " + device.id);
+		device_manager.removeClient(device);
+			// broadcast to web clients that the device has disconnected
+			const disconnected_client = {
+				event: "device_disconnected",
+				id: device.id
+			};
+			device_manager.broadcastToWebClients(JSON.stringify(disconnected_client));
+	}
+	return ws.terminate();
+}
 
 // ------------------ Event Callbacks ------------------
 // TODO: move these to device class or separate file?
@@ -154,10 +173,10 @@ function data_update(message) {
 }
 
 function get_data_devices(message) {
-	const data_devices = device_manager.getDataDevices();
+	const devices = device_manager.getDataDevices();
 	var message_to_send = {
 		event: "data_device_list",
-		data_devices: data_devices
+		devices: devices
 	};
 
 	console.log("sending " + message_to_send);
@@ -212,3 +231,20 @@ function register_web_client(data) {
 	// message_to_send = JSON.stringify(message_to_send);
 	// this.send(message_to_send);
 }
+
+
+// ping function to see if clients are still connected
+function ping() {
+	ws_server.clients.forEach(function each(ws) {
+		if (ws.isAlive === false) {
+			handleDisconnect(ws);
+		}
+		// every 30s we set the isAlive flag to false, and then ping the client
+		ws.isAlive = false;
+		console.log("pinging client");
+		ws.send('heartbeat_server'); // if they're alive, they'll respond with a heartbeat_client message
+	});
+}
+
+// set up a timer to ping the clients every 30 seconds
+const interval = setInterval(ping, 10000);
