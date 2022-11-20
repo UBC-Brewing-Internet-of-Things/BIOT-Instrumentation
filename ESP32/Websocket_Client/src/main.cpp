@@ -6,8 +6,8 @@
 #include "WiFiManager.c"
 
 // Constants
-// char * url = "192.168.50.67:3001";
-char * url = "192.168.1.139:3001";
+char * url = "192.168.50.67:3001";
+// char * url = "192.168.1.139:3001";
 char * endpoint = "";
 
 

@@ -63,21 +63,6 @@ function Dashboard() {
 				id: message_json.id
 			});
 			socket.send(request);
-
-			// we need a list of devices to display on the dashboard to get started, so we set a short interval to request the list of devices from the server
-			// if the device list is populated, we clear the interval
-			// this is a temporary solution, we should be able to request the list of devices on the initial connection
-			// var interval = setInterval(() => {
-			// 	if (devices.length === 0) {
-			// 		console.log("Requesting device list");
-			// 		socket.send(JSON.stringify({
-			// 			event: "get_data_devices",
-			// 			id: message_json.id
-			// 		}));
-			// 	} else {
-			// 		clearInterval(interval);
-			// 	}
-			// }, 10000);
 			
 		}
 	}
@@ -202,8 +187,8 @@ function Dashboard() {
 	}
 
 	function handleHeartbeat(message_json) {
-		console.log(message_json);
-		console.log("heartbeat received");
+		// console.log(message_json);
+		// console.log("heartbeat received");
 		socket.send("heartbeat_client");
 		console.log("heartbeat sent");
 	}
