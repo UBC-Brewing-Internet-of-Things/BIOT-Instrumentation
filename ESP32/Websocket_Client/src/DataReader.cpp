@@ -128,7 +128,7 @@ void esp_DataReader::readData(StaticJsonDocument<200> & doc, char * id) {
 	// data_temp[6] = '\0';
 	// ESP_LOGI(TAG, "Read %d bytes: '%s'", rxBytes_temp, data_temp);
 
-	prepareWSJSON(data_ph, data_temp, doc, id);
+	prepareWSJSON(data_temp, data_ph, doc, id);
 
 	// Now that the data is in the JSON document, we can free the buffer
 }

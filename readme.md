@@ -1,4 +1,6 @@
 # General Information
+![Web Client UI](SCR-20221119-wxl.png "UI image")
+
 ### This is the source repository for the development of BIOT's instrumentation System
 At a high level, this is the design of our system.
 ![BIOT Instrumentation Diagram](diagram2.png "Diagram")

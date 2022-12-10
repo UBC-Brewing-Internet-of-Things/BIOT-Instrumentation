@@ -1,4 +1,3 @@
-
 // This is a program to calibrate the ezo Atlas boards
 // It has two tasks:
 //      - Continuously read the sensor and print the value
@@ -20,7 +19,7 @@
 #define RXD_PIN (GPIO_NUM_16)
 #define UART UART_NUM_2
 
-#define RX_BUF_SIZE 1024
+#define RX_BUF_SIZE 256
 
 
 
@@ -37,7 +36,7 @@ int readData_h(const char* logName, char* data, uart_port_t uart_num)
 {
 	// Read data from the UART
 	ESP_LOGI(logName, "Reading data");
-	const int rxBytes = uart_read_bytes(uart_num, (uint8_t*) data, RX_BUF_SIZE, 1000 / portTICK_RATE_MS);
+	const int rxBytes = uart_read_bytes(uart_num, (uint8_t*) data, RX_BUF_SIZE, 500 / portTICK_RATE_MS);
 	// Print the data if we read any
 	if (rxBytes > 0) {
 		data[rxBytes] = 0;
@@ -85,14 +84,13 @@ void app_main() {
 	ESP_ERROR_CHECK(uart_param_config(UART_NUM_0, &uart_config_computer));
 	ESP_ERROR_CHECK(uart_set_pin(UART_NUM_0, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 
-	// disable continuous reading
-	sendData("sensor", "C,0", UART);
+	sendData("main", "C,0\r", UART);	
 
 	while (1) {
 		char data[40];
 		sendData("main", "R\r", UART);
 		int rxBytes = readData_h("UART", data, UART);
-		data[6] = '\0';
+		// data[6] = '\0';
 		
 		if (rxBytes > 0) {
 			ESP_LOGI("UART", "Read %d bytes: '%s'", rxBytes, data);
@@ -103,8 +101,6 @@ void app_main() {
 		int rxBytes2 = readData_h("Serial", data2, UART_NUM_0);
 		if (rxBytes2 > 0) {
 			ESP_LOGI("Serial", "Read %d bytes: '%s'", rxBytes2, data2);
-			// make the command end with a carriage return
-			data2[rxBytes2] = '\r';
 			sendData("main", data2, UART);
 		}
 

@@ -28,11 +28,15 @@ void app_main() {
     }
     ESP_ERROR_CHECK(ret);
 
+
+	
+
+
 	// // From sample code...
     wifi_init_sta();
 
 	// // Init Data Device
-	DataDevice * dataDevice = new DataDevice(url, endpoint, "Fermenter");
+	DataDevice * dataDevice = new DataDevice(url, endpoint, "Boiler");
 	ESP_LOGI(TAG, "DataDevice created with url: %s, endpoint: %s, deviceName: %s", url, endpoint, "test device");
 
 	// wait for everything to connect
@@ -45,7 +49,7 @@ void app_main() {
 	}
 
 	ESP_LOGI(TAG, "Id set to: %s", dataDevice->getId());
-	
+
 
 	// Main Loop
 	while (1) {
