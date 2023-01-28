@@ -1,9 +1,9 @@
-#include "DataDevice.hpp"
+#include "DataReader/DataDevice.hpp"
 #include "esp_log.h"
 #include "esp_wifi.h"
-#include "WifiCredentials.h"
+#include "WebSocket/WifiCredentials.h"
 #include "nvs_flash.h"
-#include "WiFiManager.c"
+#include "WebSocket/WiFiManager.c"
 
 // Constants
 char * url = "192.168.50.67:3001";
