@@ -11,6 +11,7 @@ static const int RX_BUF_SIZE = 256;
 
 // D O2 Sensor
 #define DO2_ADDR 0x61
+#define PH_ADDR_TEMP 0x64
 
 
 // // i2c config params
@@ -65,7 +66,11 @@ void esp_DataReader::readData(StaticJsonDocument<200> & doc, char * id) {
 	data_temp[0] = 0;
 
 	// Read pH
-	data_ph[0] = 0;
+	ESP_LOGI(TAG, "Reading pH");
+	ESP_ERROR_CHECK(i2c_master_write_to_device(I2C_NUM_0, PH_ADDR_TEMP, data, 1, TIMEOUT));
+	vTaskDelay(READ_PROCESSING_DELAY);
+	ESP_ERROR_CHECK(i2c_master_read_from_device(I2C_NUM_0, PH_ADDR_TEMP, data_ph, 10, TIMEOUT));
+	ESP_LOGI(TAG, "pH: %s", data_ph);
 
 	// Read dissolved_o2
 	ESP_LOGI(TAG, "Reading dissolved_o2");
@@ -81,12 +86,32 @@ void esp_DataReader::readData(StaticJsonDocument<200> & doc, char * id) {
 // convert data to JSON and store as a string in buffer
 void esp_DataReader::prepareWSJSON(char * data_ph, char * data_temp, char * data_o2, StaticJsonDocument<200> & doc, char * id) {
 	// add the sensor data
-	char ph[10];
-	char temperature[10];
-	char dissolved_o2[10];
+	char ph[10]={0};
+	char temperature[10]={0};
+	char dissolved_o2[10]={0};
 	sprintf(ph, "%s", data_ph); // 0 is a placeholder for now
 	sprintf(temperature, "%s", data_temp);
-	sprintf(dissolved_o2, "%d", 0);  // 0 is a placeholder for now
+	sprintf(dissolved_o2, "%s", data_o2);  // 0 is a placeholder for now
+
+	// Remove all non-numeric characters except for the decimal point
+	for (int i = 0; i < strlen(ph); i++) {
+		if (!isdigit(ph[i]) && ph[i] != '.') {
+			ph[i] = ' ';
+		}
+	}
+
+	for (int i = 0; i < strlen(temperature); i++) {
+		if (!isdigit(temperature[i]) && temperature[i] != '.') {
+			temperature[i] = ' ';
+		}
+	}
+
+	for (int i = 0; i < strlen(dissolved_o2); i++) {
+		if (!isdigit(dissolved_o2[i]) && dissolved_o2[i] != '.') {
+			dissolved_o2[i] = ' ';
+		}
+	}
+
 
 	// We want to send a "data_update" event to the server with our id, to let it know we have new data :D
 	doc["event"] = "data_update";
