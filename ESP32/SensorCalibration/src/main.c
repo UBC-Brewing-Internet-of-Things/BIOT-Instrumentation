@@ -1,76 +1,41 @@
-// This is a program to calibrate the ezo Atlas boards
-// It has two tasks:
-//      - Continuously read the sensor and print the value
-// 		- Take input from the serial and send it to the sensor
-
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "driver/i2c.h"
+#include "driver/uart.h"
 #include <nvs_flash.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "driver/uart.h"
-#include "driver/gpio.h"
-#include "sdkconfig.h"
 #include "esp_log.h"
 
-
-#define TXD_PIN (GPIO_NUM_17)
-#define RXD_PIN (GPIO_NUM_16)
-#define UART UART_NUM_2
-
+#define I2C_SLAVE_ADDR 0x61 // PH chip address, as per datasheet
+#define TIMEOUT 5000 / portTICK_RATE_MS
 #define RX_BUF_SIZE 256
 
+static const char *TAG = "I2C Calibration";
 
+// Init i2c bus for the EZO board
+void i2c_master_init() {
+	int i2c_master_port = I2C_NUM_0;
+	
+	// Configure the I2C bus
+	// This is the default configuration
+	i2c_config_t conf = {0};
+	conf.mode = I2C_MODE_MASTER;
+	conf.sda_io_num = 21; // SDA pin is GPIO 21
+	conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
+	conf.scl_io_num = 22; // SCL pin is GPIO 22
+	conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
+	conf.master.clk_speed = 100000; // 400kHz (EZO boards go 100-400kHz)
 
-// Simple method to send data over the UART connection
-int sendData(const char* logName, const char* data, uart_port_t uart_num) {
-	const int len = strlen(data);
-	const int txBytes = uart_write_bytes(uart_num, data, len);
-	ESP_LOGI(logName, "Wrote %d bytes", txBytes);
-	return txBytes;
+	// Set config and install the driver
+	ESP_ERROR_CHECK(i2c_param_config(i2c_master_port, &conf));
+	ESP_ERROR_CHECK(i2c_driver_install(i2c_master_port, conf.mode, 0, 0, 0));
 }
 
-// Simple method to read data from the UART connection
-int readData_h(const char* logName, char* data, uart_port_t uart_num)
-{
-	// Read data from the UART
-	ESP_LOGI(logName, "Reading data");
-	const int rxBytes = uart_read_bytes(uart_num, (uint8_t*) data, RX_BUF_SIZE, 500 / portTICK_RATE_MS);
-	// Print the data if we read any
-	if (rxBytes > 0) {
-		data[rxBytes] = 0;
-		//ESP_LOGI(logName, "Read %d bytes: '%s'", rxBytes, data);
-	}
-	return rxBytes;
-}
+// Init uart bus for the computer
+// So we can gather commands to send to the EZO board
+void uart_init() {
 
-
-
-void app_main() {
-
-	esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-      ESP_ERROR_CHECK(nvs_flash_erase());
-      ret = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK(ret);
-
-	// uart for the Atlas board
-   uart_config_t uart_config_sensor = {
-        .baud_rate = 9600,
-        .data_bits = UART_DATA_8_BITS,
-        .parity    = UART_PARITY_DISABLE,
-        .stop_bits = UART_STOP_BITS_1,
-        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
-        .source_clk = UART_SCLK_APB,
-    };
-	// Configure UART parameters with error checking
-	ESP_ERROR_CHECK(uart_driver_install(UART, RX_BUF_SIZE * 2, 0, 0, NULL, 0));
-	ESP_ERROR_CHECK(uart_param_config(UART, &uart_config_sensor));
-	ESP_ERROR_CHECK(uart_set_pin(UART, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
-
-	// uart for the computer
+	// Define the UART configuration from DOCS
 	uart_config_t uart_config_computer = {
 		.baud_rate = 115200,
 		.data_bits = UART_DATA_8_BITS,
@@ -84,27 +49,56 @@ void app_main() {
 	ESP_ERROR_CHECK(uart_param_config(UART_NUM_0, &uart_config_computer));
 	ESP_ERROR_CHECK(uart_set_pin(UART_NUM_0, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 
-	sendData("main", "C,0\r", UART);	
+}
+
+
+void app_main() {
+	// Init NVS for storing calibration data
+	esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+      ESP_ERROR_CHECK(nvs_flash_erase());
+      ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
+
+	// Init i2c and uart
+	i2c_master_init();
+	uart_init();
 
 	while (1) {
-		char data[40];
-		sendData("main", "R\r", UART);
-		int rxBytes = readData_h("UART", data, UART);
-		// data[6] = '\0';
+		// Send "R\r" to the EZO board to take a reading
+		uint8_t cmd[4]= "R";
+		uint8_t response[10] = {0};
+
+		// Send the command to the EZO board
+		ESP_LOGI(TAG, "Sending command: %s", cmd);
+		ESP_ERROR_CHECK(i2c_master_write_to_device(I2C_NUM_0, I2C_SLAVE_ADDR, cmd, 1, TIMEOUT));
 		
-		if (rxBytes > 0) {
-			ESP_LOGI("UART", "Read %d bytes: '%s'", rxBytes, data);
-		}
+		// Wait for processing delay
+		vTaskDelay(600 / portTICK_RATE_MS);		
 
-		// if there's a command from the computer, send it to the sensor
-		char data2[40];
-		int rxBytes2 = readData_h("Serial", data2, UART_NUM_0);
-		if (rxBytes2 > 0) {
-			ESP_LOGI("Serial", "Read %d bytes: '%s'", rxBytes2, data2);
-			sendData("main", data2, UART);
-		}
+		// Read the response from the EZO board
+		ESP_ERROR_CHECK(i2c_master_read_from_device(I2C_NUM_0, I2C_SLAVE_ADDR, response, 10, TIMEOUT));
 
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
+		ESP_LOGI(TAG, "Response: %s, %d", response, response[0]);
+
+		// If there's a command from the computer, send it to the EZO board
+		uint8_t user_data[10] = {};
+		int len = uart_read_bytes(UART_NUM_0, (uint8_t *)user_data, 10, 500 / portTICK_RATE_MS);
+		if (len > 0) {
+			ESP_LOGI(TAG, "Sending command: %s", user_data);
+			ESP_ERROR_CHECK(i2c_master_write_to_device(I2C_NUM_0, I2C_SLAVE_ADDR, user_data, len, TIMEOUT));
+			vTaskDelay(1000 / portTICK_RATE_MS); // max processing delay is 750ms
+
+			// Read the response from the EZO board
+			ESP_ERROR_CHECK(i2c_master_read_from_device(I2C_NUM_0, I2C_SLAVE_ADDR, response, 10, TIMEOUT));
+
+			ESP_LOGI(TAG, "Response to user input: %s, %d", response, response[0]);
+		}
+		
+		// Wait 1 second
+		vTaskDelay(1000 / portTICK_RATE_MS);
 	}
 
 }
+

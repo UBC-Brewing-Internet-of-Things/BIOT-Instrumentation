@@ -1,5 +1,6 @@
 #include "DataReader.hpp"
 #include "ArduinoJson.h"
+#include "driver/i2c.h"
 #include "esp_log.h"
 #define TAG "DataReader"
 static const int RX_BUF_SIZE = 1024;
@@ -13,6 +14,17 @@ static const int RX_BUF_SIZE = 1024;
 #define TXD_PIN_TEMP (GPIO_NUM_1)
 #define RXD_PIN_TEMP (GPIO_NUM_3)
 #define UART_TEMP UART_NUM_1
+
+
+// i2c config params
+#define I2C_MASTER_SCL_IO           CONFIG_I2C_MASTER_SCL      /*!< GPIO number used for I2C master clock */
+#define I2C_MASTER_SDA_IO           CONFIG_I2C_MASTER_SDA      /*!< GPIO number used for I2C master data  */
+#define I2C_MASTER_NUM              0                          /*!< I2C master i2c port number, the number of i2c peripheral interfaces available will depend on the chip */
+#define I2C_MASTER_FREQ_HZ          400000                     /*!< I2C master clock frequency */
+#define I2C_MASTER_TX_BUF_DISABLE   0                          /*!< I2C master doesn't need buffer */
+#define I2C_MASTER_RX_BUF_DISABLE   0                          /*!< I2C master doesn't need buffer */
+#define I2C_MASTER_TIMEOUT_MS       1000
+
 
 
 // TODO: use the esp event loop to handle the data reader events
@@ -71,35 +83,19 @@ int readData_h(const char* logName, char* data, int UART_use)
 esp_DataReader::esp_DataReader() {
 	ESP_LOGI(TAG, "pH Sensor Created");
 
-	// Config for the UART connection to the PH sensor (atlas scientific -> 9600 baud)
-	uart_config_t uart_config = {
-		9600,
-		UART_DATA_8_BITS,
-		UART_PARITY_DISABLE,
-		UART_STOP_BITS_1,
-		UART_HW_FLOWCTRL_DISABLE,
-		UART_SCLK_APB,
+
+	int i2c_master_port = I2C_MASTER_NUM;
+	i2c_config_t conf = {
+		I2C_MODE_MASTER,
+		I2C_MASTER_SDA_IO,
+		GPIO_PULLUP_ENABLE,
+		GPIO_PULLUP_ENABLE,
+		I2C_MASTER_FREQ_HZ,
 	};
 
 	// Configure UART parameters with error checking
-	ESP_ERROR_CHECK(uart_driver_install(UART, RX_BUF_SIZE * 2, 0, 0, NULL, 0));
-	ESP_ERROR_CHECK(uart_param_config(UART, &uart_config));
-	ESP_ERROR_CHECK(uart_set_pin(UART, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
-	
-	// We send a command "C,0" to tell the sensor to disable continuous reading mode
-	// This generally gives us simpler control over the sensor, we tell it when to read and get a response.
-	// The default mode is continuous reading mode. The LED is blinking blue/green in continuous mode. It will be just green in UART single reading mode, and blue when taking a reading. (check docs to make sure)
-	sendData("main", "C,0 \r", UART);
-	//sendData("main", "Find \r", UART); // make the light flash white so we know it's listening....
-
-	// ESP_LOGI(TAG, "Temperature Sensor Created");
-
-	// ESP_ERROR_CHECK(uart_driver_install(UART_TEMP, RX_BUF_SIZE * 2, 0, 0, NULL, 0));
-	// ESP_ERROR_CHECK(uart_param_config(UART_TEMP, &uart_config));
-	// ESP_ERROR_CHECK(uart_set_pin(UART_TEMP, TXD_PIN_TEMP, RXD_PIN_TEMP, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
-
-	// sendData("main", "C,0 \r", UART_TEMP);
-	//sendData("main", "Find \r", UART_TEMP); // make the light flash white so we know whats up
+	ESP_ERROR_CHECK(i2c_param_config(i2c_master_port, &conf);
+	ESP_ERROR_CHECK(i2c_driver_install(i2c_master_port, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);
 
 	ESP_LOGI(TAG, "Sensors initialized");
 }
