@@ -20,7 +20,12 @@
 
 <!-- Intro -->
 
-<h1 align="left">UBC Envision - Brewing Internet of Things</h1>
+<h1 align="center">UBC Envision - Brewing Internet of Things</h1>
+
+<!-- Repo Info -->
+
+<h2 align="left">Repository Info</h2>
+
 This is the repository for BIoT’s instrumentation team at the University of British Columbia. This repository is a comprehensive receptacle for storing the team’s instrumentation projects. In here, documentation and code can be found for sensing various things such as temperature, acidity, gravity, and other things. The main goal is to interface these sensors into an online webserver, being able to be accessed from anywhere, while still remaining at a cost low enough for homebrewers and small brewing companies.
 
 # General Information
