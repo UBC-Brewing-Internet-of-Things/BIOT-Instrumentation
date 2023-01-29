@@ -6,8 +6,8 @@
 #include "freertos/task.h"
 #include "esp_log.h"
 
-#define I2C_SLAVE_ADDR 0x64 // PH chip address, as per datasheet
-#define TIMEOUT 5000 / portTICK_RATE_MS
+#define I2C_SLAVE_ADDR 0x66 // PH chip address, as per datasheet
+#define TIMEOUT 1000 / portTICK_RATE_MS
 #define RX_BUF_SIZE 256
 
 static const char *TAG = "I2C Calibration";

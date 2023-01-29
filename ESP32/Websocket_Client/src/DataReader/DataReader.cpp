@@ -6,12 +6,12 @@
 
 static const int RX_BUF_SIZE = 256;
 
-#define TIMEOUT 1000 / portTICK_RATE_MS
-#define READ_PROCESSING_DELAY 600 / portTICK_RATE_MS
-
-// D O2 Sensor
+#define TIMEOUT 5000 / portTICK_RATE_MS
+#define DO_PROCESSING_DELAY 600 / portTICK_RATE_MS
+#define PH_PROCESSING_DELAY 900 / portTICK_RATE_MS
 #define DO2_ADDR 0x61
-#define PH_ADDR_TEMP 0x64
+#define PH_ADDR_TEMP 0x63
+#define RTD_ADDR 0x66
 
 
 // // i2c config params
@@ -63,24 +63,28 @@ void esp_DataReader::readData(StaticJsonDocument<200> & doc, char * id) {
 	uint8_t data_dissolved_o2[10] = {0};
 
 	// Read temperature
-	data_temp[0] = 0;
+	ESP_LOGI(TAG, "Reading temp");
+	ESP_ERROR_CHECK_WITHOUT_ABORT(i2c_master_write_to_device(I2C_NUM_0, RTD_ADDR, data, 1, TIMEOUT));
+	vTaskDelay(DO_PROCESSING_DELAY);
+	ESP_ERROR_CHECK_WITHOUT_ABORT(i2c_master_read_from_device(I2C_NUM_0, RTD_ADDR, data_temp, 10, TIMEOUT));
+	ESP_LOGI(TAG, "temp: %s", data_temp);
+	
 
 	// Read pH
 	ESP_LOGI(TAG, "Reading pH");
-	ESP_ERROR_CHECK(i2c_master_write_to_device(I2C_NUM_0, PH_ADDR_TEMP, data, 1, TIMEOUT));
-	vTaskDelay(READ_PROCESSING_DELAY);
-	ESP_ERROR_CHECK(i2c_master_read_from_device(I2C_NUM_0, PH_ADDR_TEMP, data_ph, 10, TIMEOUT));
+	ESP_ERROR_CHECK_WITHOUT_ABORT(i2c_master_write_to_device(I2C_NUM_0, PH_ADDR_TEMP, data, 1, TIMEOUT));
+	vTaskDelay(PH_PROCESSING_DELAY);
+	ESP_ERROR_CHECK_WITHOUT_ABORT(i2c_master_read_from_device(I2C_NUM_0, PH_ADDR_TEMP, data_ph, 10, TIMEOUT));
 	ESP_LOGI(TAG, "pH: %s", data_ph);
 
 	// Read dissolved_o2
 	ESP_LOGI(TAG, "Reading dissolved_o2");
-	ESP_ERROR_CHECK(i2c_master_write_to_device(I2C_NUM_0, DO2_ADDR, data, 1, TIMEOUT));
-	vTaskDelay(READ_PROCESSING_DELAY);
-	ESP_ERROR_CHECK(i2c_master_read_from_device(I2C_NUM_0, DO2_ADDR, data_dissolved_o2, 10, TIMEOUT));
+	ESP_ERROR_CHECK_WITHOUT_ABORT(i2c_master_write_to_device(I2C_NUM_0, DO2_ADDR, data, 1, TIMEOUT));
+	vTaskDelay(DO_PROCESSING_DELAY);
+	ESP_ERROR_CHECK_WITHOUT_ABORT(i2c_master_read_from_device(I2C_NUM_0, DO2_ADDR, data_dissolved_o2, 10, TIMEOUT));
 	ESP_LOGI(TAG, "dissolved_o2: %s", data_dissolved_o2);
 
 	prepareWSJSON((char *) data_ph, (char *) data_temp, (char *) data_dissolved_o2, doc, id);
-
 }
 
 // convert data to JSON and store as a string in buffer
