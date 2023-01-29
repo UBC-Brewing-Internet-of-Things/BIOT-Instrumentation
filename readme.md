@@ -1,5 +1,9 @@
 <!-- Intro -->
 
+<p align="center">
+  <img width="80%" src="header.png" />
+</p>
+
 <!-- Links/Socials -->
 
 <div id="badges" align="center">
