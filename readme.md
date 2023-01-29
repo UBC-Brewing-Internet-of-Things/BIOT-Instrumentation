@@ -1,3 +1,19 @@
+<!-- Intro -->
+
+<!-- Links/Socials -->
+
+<div id="badges" align="center">
+<a href="https://www.ubcenvision.com/beer/">
+    <img src="https://img.shields.io/badge/BIoT Homepage-24242c?logo=undertale&logoColor=white&style=for-the-badge" alt="Email Badge">
+  </a>
+  <a href="https://www.instagram.com/ubcbiot/">
+    <img src="https://img.shields.io/badge/Instagram-24242c?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram Badge">
+  </a>
+  <a href="mailto:brewing@ubcenvision.com">
+    <img src="https://img.shields.io/badge/Email-24242c?logo=gmail&logoColor=white&style=for-the-badge" alt="Email Badge">
+  </a>
+</div>
+
 # General Information
 ![Web Client UI](SCR-20221119-wxl.png "UI image")
 
