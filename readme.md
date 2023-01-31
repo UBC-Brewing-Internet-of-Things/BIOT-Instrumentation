@@ -1,7 +1,7 @@
 <!-- Header -->
 
 <p align="center">
-  <img width="80%" src="header.png" />
+  <img width="100%" src="header.png" />
 </p>
 
 <!-- Links/Socials -->
