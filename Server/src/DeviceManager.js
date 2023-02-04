@@ -174,6 +174,8 @@ class DeviceManager {
 		}
 	}
 
+	get	
+
 	
 
 }

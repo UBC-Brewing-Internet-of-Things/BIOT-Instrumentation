@@ -78,6 +78,32 @@ app.get('/', function (req, res) {
 	res.send(device_manager.getDeviceList());
 });
 
+// 
+app.get('/downloadRecording', function (req, res) {
+	console.log("sending requested recording");
+
+	
+	const deviceName = req.params.device;
+	const deviceId = req.params.id;
+
+	// Check to make sure the device is registered
+	const device = device_manager.findClientById(deviceId);
+	if (device === undefined || device.name !== deviceName) {
+		console.log("device not registered");
+		return;
+	}
+
+	// Check to make sure the device has a file with recordings
+	// file is at the root, with the name of the device . csv
+	const filename = device.name + ".csv"; // use the stored name, not the name from the request
+	if (!fs.existsSync(filename)) {
+		console.log("file does not exist");
+		return;
+	}
+
+	res.download(filename);
+})
+
 // ------------------ Websocket Message Handling ------------------
 ws_server.on("connection", socket => {
 
