@@ -1,7 +1,8 @@
 // esp32 websocket wrapper than encapsulates the websocket connection and provides a simple interface to send and receive messages
 // using the ESP espressif esp32 websocket
 
-#include "DataDevice.hpp"
+#include "../DataReader/DataDevice.hpp"
+//#include "esp_WebSocket.hpp"
 #include "esp_log.h"
 #include <string>
 
