@@ -5,6 +5,7 @@ const express = require('express');
 const app = express();
 const {v4: uuidv4} = require("uuid");
 const DeviceManager = require("./DeviceManager.js");
+const fs = require('fs');
 
 
 // WEBSOCKET SERVER
@@ -37,6 +38,7 @@ function registerCallbacks() {
 	registerCallback("get_data_devices", get_data_devices);
 	registerCallback("start_recording", start_recording);
 	registerCallback("stop_recording", stop_recording);
+	registerCallback("delete_recordings", delete_recordings);
 }
 
 function messageDispatcher(message) {
@@ -75,8 +77,45 @@ server.on('upgrade', (request, socket_obj, head) => {
 
 // testing purposes...
 app.get('/', function (req, res) {
+	console.log("sending device list");
 	res.send(device_manager.getDeviceList());
 });
+
+// 
+app.get('/downloadRecording', function (req, res) {
+	console.log("sending requested recording");
+
+
+	const deviceName = req.query.name;
+	const deviceId = req.query.id;
+	console.log(deviceId);
+	console.log(req.query);
+
+	// Check to make sure the device is registered
+	const device = device_manager.findClientById(deviceId);
+	if (device === undefined) {
+			console.log("device not registered");
+			res.end();
+			return;
+	}
+
+	if (device.name !== deviceName) {
+			console.log("device name does not match registered id");
+			res.end();
+			return;
+	}
+
+	// Check to make sure the device has a file with recordings
+	// file is at the root, with the name of the device . csv
+	const filename = device.name + ".csv"; // use the stored name, not the name from the request
+	if (!fs.existsSync(filename)) {
+			console.log("file does not exist");
+			return;
+	}
+
+	res.download(filename);
+	return;
+})
 
 // ------------------ Websocket Message Handling ------------------
 ws_server.on("connection", socket => {
@@ -209,6 +248,11 @@ function start_recording(message) {
 function stop_recording(message) {
 	console.log("stopping recording for device " + message.id);
 	device_manager.stopRecording(message.id);
+}
+
+function delete_recordings(message) {
+	console.log("deleting recording for device " + message.id);
+	device_manager.deleteRecording(message.id);
 }
 
 

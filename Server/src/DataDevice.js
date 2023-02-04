@@ -1,5 +1,6 @@
 const DataWriter = require('./DataWriter.js');
 const Client = require('./Client.js');
+var fs = require('fs');
 
 class DataDevice extends Client {
 	constructor(id, name, type, socket, parent) {
@@ -55,6 +56,16 @@ class DataDevice extends Client {
 			console.log("no recording to stop");
 		}
 	}
+
+	deleteRecording() {
+		const filename = this.name + ".csv";
+		try {
+			fs.unlinkSync(filename);
+		} catch (err) {
+			console.error(err);
+		}
+	}
+
 
 }
 

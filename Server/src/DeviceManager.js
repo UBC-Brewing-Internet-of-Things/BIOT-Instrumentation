@@ -174,7 +174,14 @@ class DeviceManager {
 		}
 	}
 
-	
+	deleteRecording(id) {
+		var device = this.getDataDevice(id);
+		if (device !== undefined) {
+			device.deleteRecording();
+		} else {
+			console.log("Device not found, cannot clear recording");
+		}
+	}
 
 }
 module.exports = DeviceManager;

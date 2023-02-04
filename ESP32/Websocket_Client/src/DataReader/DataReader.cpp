@@ -6,7 +6,7 @@
 
 static const int RX_BUF_SIZE = 256;
 
-#define TIMEOUT 5000 / portTICK_RATE_MS
+#define TIMEOUT 1000 / portTICK_RATE_MS
 #define DO_PROCESSING_DELAY 600 / portTICK_RATE_MS
 #define PH_PROCESSING_DELAY 900 / portTICK_RATE_MS
 #define DO2_ADDR 0x61

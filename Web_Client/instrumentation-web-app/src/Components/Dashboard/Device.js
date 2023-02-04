@@ -18,7 +18,6 @@ function Device(props) {
 	let data = useRef(props.data);
 	let recording = props.recording;
 	data.current = props.data;
-	
 
 	const socket = useContext(SocketContext);
 
@@ -57,17 +56,32 @@ function Device(props) {
 				event: "start_recording",
 				id: id,
 			}));
-			buttonRef.current.innerHTML = "Stop Recording";
 			setStartStop(true);
 		} else {
 			socket.send(JSON.stringify({
 				event: "stop_recording",
 				id: id,
 			}));
-			buttonRef.current.innerHTML = "Start Recording";
 			setStartStop(false);
 		}
-	}	
+	}
+
+	function handleDeleteClick() {
+		console.log("Delete button clicked");
+		socket.send(JSON.stringify({
+			event: "delete_recordings",
+			id: id,
+		}));
+	}
+
+	function handleDownloadClick() {
+		console.log("Download button clicked");
+		window.open("http://192.168.50.107:3001/downloadRecording?id=" + id+"&name="+name);
+	};
+
+	
+	
+	
 
 	// When we collapse, we want to store the current state of the charts
 	// When we expand, we want to restore the state of the charts
@@ -115,8 +129,24 @@ function Device(props) {
 						<DataChart name="temperature" value={tempref.current} units="°C" id={id} />
 						<DataChart name="dissolved_o2" value={o2ref.current} units="ppm" id={id} />
 				</div>
-				<button ref={buttonRef}className="record_button" style={style_object.record_button} onClick={() => handleRecordingClick()}>Toggle Recording</button>
-				<p className="recording_status" style={style_object.recording_status}>{recording === true ? "Recording" : "Not recording"}</p>
+				<div>
+
+				{recording === true 
+					? 
+					<>
+					<p>Recording...</p> 
+					<button ref={buttonRef}className="record_button" style={style_object.record_button} onClick={() => handleRecordingClick()}>Stop Recording</button>
+					</>
+					
+					: 
+					<>
+					<p>Not Recording</p>
+					<button ref={buttonRef}className="record_button" style={style_object.record_button} onClick={() => handleRecordingClick()}>Start Recording</button>
+					</>
+				}
+				<button className="delete_button" style={style_object.clear_button} onClick={() => handleDeleteClick()}>Clear Data</button>
+				<button className="download_button" style={style_object.download_button} onClick={() => handleDownloadClick()}>Download Data</button>	
+				</div>	
 				</>
 			}
 	</div>
