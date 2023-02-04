@@ -37,6 +37,7 @@ function registerCallbacks() {
 	registerCallback("get_data_devices", get_data_devices);
 	registerCallback("start_recording", start_recording);
 	registerCallback("stop_recording", stop_recording);
+	registerCallback("delete_recordings", delete_recordings);
 }
 
 function messageDispatcher(message) {
@@ -235,6 +236,11 @@ function start_recording(message) {
 function stop_recording(message) {
 	console.log("stopping recording for device " + message.id);
 	device_manager.stopRecording(message.id);
+}
+
+function delete_recordings(message) {
+	console.log("deleting recording for device " + message.id);
+	device_manager.deleteRecording(message.id);
 }
 
 
