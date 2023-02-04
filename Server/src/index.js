@@ -5,6 +5,7 @@ const express = require('express');
 const app = express();
 const {v4: uuidv4} = require("uuid");
 const DeviceManager = require("./DeviceManager.js");
+const fs = require('fs');
 
 
 // WEBSOCKET SERVER
