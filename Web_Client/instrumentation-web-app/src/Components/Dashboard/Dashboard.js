@@ -83,34 +83,35 @@ function Dashboard() {
 				return;
 			}
 
-			// if the device_list is empty then
-			
-		    for (var device_json of message_json.devices) {
-				const id = device_json.id;
-				// check if the device is already in devices
-				var device = devices.find((device) => device.id === id);
-				if (device !== undefined) {
-					console.log("device already exists");
-					// if the device is already in devices, we update the device to match the new id
-					return;
-				}
-				const name = device_json.name;
-				// check if device name is already in devices 
-				setDevices(devices.filter((device) => device.name !== name));
 
-
-				const temp_devices = [...devices];
-				const device_proto = {
-					id: device_json.id,
-					name: device_json.name,
-					type: device_json.type,
-					data: device_json.data,
-					recording: device_json.recording
-				}
-				temp_devices.push(device_proto);
-				setDevices(temp_devices);
-				console.log("added device: " + device_proto);
+		const temp_devices = [...devices];
+		// if the device_list is empty then
+		for (var device_json of message_json.devices) {
+			const id = device_json.id;
+			console.log(device_json);
+			// check if the device is already in devices
+			var device = devices.find((device) => device.id === id);
+			if (device !== undefined) {
+			console.log("device already exists");
+				// if the device is already in devices, we update the device to match the new id
+				return;
 			}
+			const name = device_json.name;
+			// check if device name is already in devices 
+			setDevices(devices.filter((device) => device.name !== name));
+
+
+			const device_proto = {
+				id: device_json.id,
+				name: device_json.name,
+				type: device_json.type,
+				data: device_json.data,
+				recording: device_json.recording
+			}
+			temp_devices.push(device_proto);
+			console.log("added device: " + device_proto);
+		}
+		setDevices(temp_devices);
 	}
 
 	// function to handle data_update message
