@@ -121,7 +121,7 @@ var style_object = {
 		border: "7px solid #a6a6a6",
 	},
 	data_widget_value: {
-		fontSize: "60px",
+		fontSize: "50px",
 		fontFamily: "Roboto Medium",
 		position: "relative",
 		top: "10%"
