@@ -46,7 +46,7 @@ class DataDevice extends Client {
 
 	stopRecording() {
 		if (this.recording) {
-			fs.appendFile(this.name + ".csv", "true,0,0,0,0\n", function(err) {
+			fs.appendFile(this.name + ".csv", "STOP,0,0,0,0\n", function(err) {
 				if (err) {
 					return console.log(err);
 				}
