@@ -105,7 +105,12 @@ function Device(props) {
 			{/* Device name + id */}	
 			<div className="collapsed-view" style={style_object.collapsed_view} onClick={() => {setExpanded(expanded => !expanded)}}>
 				<div className="device_details" style ={style_object.device_details}>
-					<p className="data_title" style={style_object.data_title}>{name}</p>
+					<div style={{display: "flex", flexDirection: "row", justifyContent: "center"}}>
+						<p className="data_title" style={style_object.data_title}>{name}</p>
+						{ recording &&
+							<span class="dot" style={style_object.dot}></span>
+						}
+					</div>
 					<p className="data_id" style={style_object.data_id}>id:{id}</p>
 				</div>
 				{ !data ?
@@ -236,54 +241,12 @@ var style_object = {
 		alignItems: "center",
 		width: "100%",
 		margin: "1vh 0"
+	},
+	dot : {
+		width: "1vw",
+		height: "1vw",
+		borderRadius: "50%",
+		backgroundColor: "red",
 	}
 	
 }
-
-/*
-TODOS:
-	- Expanded View
-		- Click on device to expand
-		- Contains a graph of the data over the past hour (user can select time range)
-		- Contains a 'record' button
-			- When clicked, the device will make a call to the server to start recording data
-				- The button will turn red and "RECORDING" text will appear to indicate that the device is recording
-			- When clicked again, the device will make a call to the server to stop recording data
-				- The button will turn grey and "RECORD" text will appear to indicate that the device is no longer recording
-
-*/
-
-// /* CSS */
-// .button-38 {
-//   background-color: #FFFFFF;
-//   border: 0;
-//   border-radius: .5rem;
-//   box-sizing: border-box;
-//   color: #111827;
-//   font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
-//   font-size: .875rem;
-//   font-weight: 600;
-//   line-height: 1.25rem;
-//   padding: .75rem 1rem;
-//   text-align: center;
-//   text-decoration: none #D1D5DB solid;
-//   text-decoration-thickness: auto;
-//   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-//   cursor: pointer;
-//   user-select: none;
-//   -webkit-user-select: none;
-//   touch-action: manipulation;
-// }
-
-// .button-38:hover {
-//   background-color: rgb(249,250,251);
-// }
-
-// .button-38:focus {
-//   outline: 2px solid transparent;
-//   outline-offset: 2px;
-// }
-
-// .button-38:focus-visible {
-//   box-shadow: none;
-// }
