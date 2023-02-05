@@ -10,7 +10,7 @@ function DataChart(props) {
 		labels: [" "],
 		datasets: [
 			{
-				data: [0],
+				data: [],
 				backgroundColor: [
 					// a nice blue
 					'rgba(54, 162, 235, 0.2)',
@@ -39,7 +39,16 @@ function DataChart(props) {
 					}
 				}
 			}
-		}
+		},
+		plugins: {
+            tooltips: {
+				callbacks: {
+				  label: (ttItem) => (ttItem.value)
+				}
+			}
+        }
+			
+				
 	}
 
 	// number of points to display on the chart

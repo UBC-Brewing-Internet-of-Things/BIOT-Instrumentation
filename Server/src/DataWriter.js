@@ -32,6 +32,15 @@ class DataWriter {
 		});
 	}
 
+	writeRecordingStop() {
+		const to_write = "true,0,0,0,0\n";
+		fs.appendFile(this.filename, to_write, function(err) {
+			if (err) {
+				return console.log(err);
+			}
+		});
+	}
+
 	close() {
 		this.writeStream.close();
 	}
