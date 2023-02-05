@@ -67,6 +67,10 @@ function Device(props) {
 	}
 
 	function handleDeleteClick() {
+		if (recording) {
+			alert("Cannot delete a recording that is currently being recorded");
+			return;
+		}
 		console.log("Delete button clicked");
 		socket.send(JSON.stringify({
 			event: "delete_recordings",
@@ -129,7 +133,7 @@ function Device(props) {
 						<DataChart name="temperature" value={tempref.current} units="°C" id={id} />
 						<DataChart name="dissolved_o2" value={o2ref.current} units="ppm" id={id} />
 				</div>
-				<div>
+				<div style={style_object.recording_section}>
 
 				{recording === true 
 					? 
@@ -144,8 +148,8 @@ function Device(props) {
 					<button ref={buttonRef}className="record_button" style={style_object.record_button} onClick={() => handleRecordingClick()}>Start Recording</button>
 					</>
 				}
-				<button className="delete_button" style={style_object.clear_button} onClick={() => handleDeleteClick()}>Clear Data</button>
-				<button className="download_button" style={style_object.download_button} onClick={() => handleDownloadClick()}>Download Data</button>	
+				<button className="record_button" style={style_object.record_button} onClick={() => handleDeleteClick()}>Delete Data</button>
+				<button className="record_button" style={style_object.record_button} onClick={() => handleDownloadClick()}>Download Data</button>	
 				</div>	
 				</>
 			}
@@ -217,8 +221,23 @@ var style_object = {
 		padding: "2vh",
 	},
 	record_button: {
-		
+		backgroundColor: "rgba(54, 162, 235, 0.5)",
+		border: "0",
+		borderRadius: ".5rem",
+		padding: "0.5vw 1vw",
+		margin: "1vw 1vw",
+		boxSizing: "border-box",
+		fontFamily: "Roboto",
+		textAlign: "center",
+	},
+	recording_section: {
+		display: "flex",
+		flexDirection: "row",
+		alignItems: "center",
+		width: "100%",
+		margin: "1vh 0"
 	}
+	
 }
 
 /*
@@ -234,3 +253,37 @@ TODOS:
 
 */
 
+// /* CSS */
+// .button-38 {
+//   background-color: #FFFFFF;
+//   border: 0;
+//   border-radius: .5rem;
+//   box-sizing: border-box;
+//   color: #111827;
+//   font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+//   font-size: .875rem;
+//   font-weight: 600;
+//   line-height: 1.25rem;
+//   padding: .75rem 1rem;
+//   text-align: center;
+//   text-decoration: none #D1D5DB solid;
+//   text-decoration-thickness: auto;
+//   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+//   cursor: pointer;
+//   user-select: none;
+//   -webkit-user-select: none;
+//   touch-action: manipulation;
+// }
+
+// .button-38:hover {
+//   background-color: rgb(249,250,251);
+// }
+
+// .button-38:focus {
+//   outline: 2px solid transparent;
+//   outline-offset: 2px;
+// }
+
+// .button-38:focus-visible {
+//   box-shadow: none;
+// }
