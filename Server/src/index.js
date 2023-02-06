@@ -110,6 +110,7 @@ app.get('/downloadRecording', function (req, res) {
 	const filename = device.name + ".csv"; // use the stored name, not the name from the request
 	if (!fs.existsSync(filename)) {
 			console.log("file does not exist");
+			res.end();
 			return;
 	}
 
