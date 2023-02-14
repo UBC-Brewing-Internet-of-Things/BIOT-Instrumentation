@@ -77,12 +77,12 @@ void esp_DataReader::readData(StaticJsonDocument<200> & doc, char * id) {
 	ESP_ERROR_CHECK_WITHOUT_ABORT(i2c_master_read_from_device(I2C_NUM_0, PH_ADDR_TEMP, data_ph, 10, TIMEOUT));
 	ESP_LOGI(TAG, "pH: %s", data_ph);
 
-	// Read dissolved_o2
-	ESP_LOGI(TAG, "Reading dissolved_o2");
-	ESP_ERROR_CHECK_WITHOUT_ABORT(i2c_master_write_to_device(I2C_NUM_0, DO2_ADDR, data, 1, TIMEOUT));
-	vTaskDelay(DO_PROCESSING_DELAY);
-	ESP_ERROR_CHECK_WITHOUT_ABORT(i2c_master_read_from_device(I2C_NUM_0, DO2_ADDR, data_dissolved_o2, 10, TIMEOUT));
-	ESP_LOGI(TAG, "dissolved_o2: %s", data_dissolved_o2);
+	// // Read dissolved_o2
+	// ESP_LOGI(TAG, "Reading dissolved_o2");
+	// ESP_ERROR_CHECK_WITHOUT_ABORT(i2c_master_write_to_device(I2C_NUM_0, DO2_ADDR, data, 1, TIMEOUT));
+	// vTaskDelay(DO_PROCESSING_DELAY);
+	// ESP_ERROR_CHECK_WITHOUT_ABORT(i2c_master_read_from_device(I2C_NUM_0, DO2_ADDR, data_dissolved_o2, 10, TIMEOUT));
+	// ESP_LOGI(TAG, "dissolved_o2: %s", data_dissolved_o2);
 
 	prepareWSJSON((char *) data_ph, (char *) data_temp, (char *) data_dissolved_o2, doc, id);
 }

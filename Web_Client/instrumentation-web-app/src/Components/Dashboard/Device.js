@@ -64,6 +64,7 @@ function Device(props) {
 			}));
 			setStartStop(false);
 		}
+		createTimedPopup("Recording started");
 	}
 
 	function handleDeleteClick() {
@@ -76,6 +77,7 @@ function Device(props) {
 			event: "delete_recordings",
 			id: id,
 		}));
+		createTimedPopup("Deleted recording");
 	}
 
 	function handleDownloadClick() {
@@ -83,8 +85,16 @@ function Device(props) {
 		window.open("http://192.168.50.107:3001/downloadRecording?id=" + id+"&name="+name);
 	};
 
-	
-	
+
+	function createTimedPopup(message) {
+		const popup = document.createElement("div");
+		popup.classList.add("popup");
+		popup.innerText = message;
+		document.body.appendChild(popup);
+		setTimeout(() => {
+			popup.remove();
+		}, 2000);
+	}
 	
 
 	// When we collapse, we want to store the current state of the charts
@@ -125,7 +135,7 @@ function Device(props) {
 						<div className="device_data" style={style_object.device_data}>
 							<DataWidget name="pH" value={data.current.pH} units="" id={id} />
 							<DataWidget name="temperature" value={data.current.temperature} units="°C" id={id} />
-							<DataWidget name="dissolved_o2" value={data.current.dissolved_o2} units="ppm" id={id} />
+							{ /* DataWidget name="dissolved_o2" value={data.current.dissolved_o2} units="ppm" id={id} /> */}
 						</div>
 					</div>
 				}
@@ -136,7 +146,7 @@ function Device(props) {
 				<div className="expanded-view" style={style_object.expanded_view}>
 						<DataChart name="pH" value={phref.current} units="" id={id} />
 						<DataChart name="temperature" value={tempref.current} units="°C" id={id} />
-						<DataChart name="dissolved_o2" value={o2ref.current} units="ppm" id={id} />
+						{ /* <DataChart name="dissolved_o2" value={o2ref.current} units="ppm" id={id} /> */}
 				</div>
 				<div style={style_object.recording_section}>
 
