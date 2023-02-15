@@ -32,8 +32,19 @@ function Dashboard() {
     const socket = useContext(SocketContext);
 
 	// useState to store the list of devices, state is managed by the useEffect hook
-	// initial value is an empty array
-	const [devices, setDevices] = useState([]);
+	const [devices, setDevices] = useState([
+		{
+			id: "1",
+			name: "device1",
+			type: "type1",
+			data: {
+				"temperature": 0,
+				"pH": 0,
+			},
+			recording: false
+		},
+			
+	]);
 
 
 	// ------------- Callbacks -------------

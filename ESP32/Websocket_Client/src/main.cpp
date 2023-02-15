@@ -32,7 +32,7 @@ void app_main() {
     wifi_init_sta();
 
     // // Init Data Device
-    DataDevice * dataDevice = new DataDevice(url, endpoint, "Fermenter");
+    DataDevice * dataDevice = new DataDevice(url, endpoint, "Bob");
     ESP_LOGI(TAG, "DataDevice created with url: %s, endpoint: %s, deviceName: %s", url, endpoint, "test device");
 
     // wait for everything to connect

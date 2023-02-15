@@ -104,9 +104,9 @@ export default DataWidget;
 // Styles ---
 var style_object = {
 	data_widget: {
-		width: "15vh",
-		height: "15vh",
-		padding: "2vh",
+		width: "15vw",
+		height: "15vw",
+		padding: "2vw",
 		position: "relative"
 	},
 	data_widget_circle: {
@@ -121,22 +121,22 @@ var style_object = {
 		border: "7px solid #a6a6a6",
 	},
 	data_widget_value: {
-		fontSize: "50px",
+		fontSize: "5vw",
 		fontFamily: "Roboto Medium",
 		position: "relative",
 		top: "10%"
 	},
 	data_widget_units: {
-		fontSize: "10px",
+		fontSize: "1vw",
 		fontFamily: "Roboto Light",
 		position: "relative"
 	},
 	data_widget_name: {
-		fontSize: "15px",
+		fontSize: "1.5vw",
 		fontFamily: "Roboto Light",
 		fontWeight: "light",
 		position: "relative",
-		top: "-40%"
+		top: "-5vw"
 	},
 	data_widget_div: {
 		display: "flex",
