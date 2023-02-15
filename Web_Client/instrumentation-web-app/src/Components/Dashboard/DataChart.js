@@ -1,8 +1,8 @@
 import React , { useState, useEffect , useRef} from 'react';
 import { Chart } from 'react-chartjs-2';
-import { Chart as ChartJS, LineController, LineElement, PointElement, LinearScale, Title, CategoryScale } from 'chart.js';
+import { Chart as ChartJS, LineController, LineElement, PointElement, LinearScale, Title, CategoryScale, Tooltip } from 'chart.js';
 
-ChartJS.register(LineController, LineElement, PointElement, LinearScale, Title, CategoryScale);
+ChartJS.register(LineController, LineElement, PointElement, LinearScale, Title, CategoryScale, Tooltip);
 
 function DataChart(props) {
 	
@@ -39,16 +39,7 @@ function DataChart(props) {
 					}
 				}
 			}
-		},
-		plugins: {
-            tooltips: {
-				callbacks: {
-				  label: (ttItem) => (ttItem.value)
-				}
-			}
-        }
-			
-				
+		}			
 	}
 
 	// number of points to display on the chart
@@ -78,18 +69,6 @@ function DataChart(props) {
 
 	}, [props.value, chartRef]);
 
-	// on component mount and unmout, we want to load/store the chart data from the state
-	useEffect(() => {
-		const chart = chartRef.current;
-		if (chart !== null) {
-			chart.data = chartData;
-		}
-
-		return () => {
-			setChartData(chart.data);
-		}
-	}, []);
-
 	return (
 		<div id="chart-container" style={style_object.chart}>
 			<Chart ref={chartRef} type='line' data={chartData} options={options}/>
@@ -105,7 +84,7 @@ export default DataChart;
 
 const style_object = {
 	chart: {
-		width: '33%',
+		width: '50%',
 		height: '33%',
 	}
 }

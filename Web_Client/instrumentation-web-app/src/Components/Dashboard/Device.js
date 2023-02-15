@@ -232,7 +232,7 @@ var style_object = {
 		height: "100%",
 		display: "flex",
 		flexDirection: "row",
-		justifyContent: "space-between",
+		//justifyContent: "space-between",
 		padding: "2vh",
 	},
 	record_button: {
