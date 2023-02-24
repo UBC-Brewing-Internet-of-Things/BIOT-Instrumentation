@@ -32,19 +32,7 @@ function Dashboard() {
     const socket = useContext(SocketContext);
 
 	// useState to store the list of devices, state is managed by the useEffect hook
-	const [devices, setDevices] = useState([
-		{
-			id: "1",
-			name: "device1",
-			type: "type1",
-			data: {
-				"temperature": 0,
-				"pH": 0,
-			},
-			recording: false
-		},
-			
-	]);
+	const [devices, setDevices] = useState([]);
 
 
 	// ------------- Callbacks -------------
@@ -237,7 +225,6 @@ function Dashboard() {
 
     return (
         <div classname="main-container">
-            <h1 style={style_object.title} >Connected Data Sources:</h1>
 			<div classname="device-list" style={style_object.device_list}>
 				{
 					devices_rendered.length > 0 ? devices_rendered : <p>No devices connected</p>
