@@ -12,6 +12,12 @@
   - Finished creating Fred Mach 2.
   - Created this document!
   
+  <img src="https://github.com/frehlid/BIOT-Instrumentation/blob/bfb30a5cc2a246063020bde5ef7a10abdf326e2c/images/march5pic1.jpg" width="30%" alt="Picture of Fred Mach 1" />
+  
+  <img src="https://github.com/frehlid/BIOT-Instrumentation/blob/bfb30a5cc2a246063020bde5ef7a10abdf326e2c/images/march5pic2.jpg" width="30%" alt="Picture of Fred Mach 2" /> 
+  
+  <img src="https://github.com/frehlid/BIOT-Instrumentation/blob/bfb30a5cc2a246063020bde5ef7a10abdf326e2c/images/march5pic3.jpg" width="30%" alt="Picture of Fred Mach 1 and 2 side-by-side" />
+  
 </details>
 
 ---
@@ -23,6 +29,8 @@
   
   - Thing1
   - Thing2
+
+  <img width="30%" alt="" src="" />
   
 </details>
 
