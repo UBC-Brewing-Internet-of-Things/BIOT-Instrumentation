@@ -5,6 +5,15 @@
 ---
 
 <details open>
+  <summary>March 6th 2023 - March 12th 2023</summary>
+  
+  - Created the Fred Mach 2 case.
+  <img width="50%" alt="Picture of Fred Mach 2 Case" src="https://github.com/frehlid/BIOT-Instrumentation/blob/1308a5d969322017bfbb6b5eb05f71e86469a14c/images/march6pic1.png" />
+  
+</details>
+
+---
+<details open>
   <summary>February 27th 2023 - March 5th 2023</summary>
   
   - Troubleshooted PH probe not reading data (issue was faulty wire).
