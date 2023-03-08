@@ -3,13 +3,14 @@
 <h3>Welcome to BIoT's changelog page! Here you can find a weekly log of all the updates, improvements, and fixes our team administers to the project, whether it is software or hardware related. As the Instrumentation subteam continues to evolve and innovate, we want to keep our current, and future members informed about our progress, hence why this changelog page is an integral part of that process.</h3>
 
 ---
+ 
+
 
 <details open>
   <summary>March 6th 2023 - March 12th 2023</summary>
-  
+ 
   - Created the Fred Mach 2 case.
-  <img width="50%" alt="Picture of Fred Mach 2 Case" src="https://github.com/frehlid/BIOT-Instrumentation/blob/1308a5d969322017bfbb6b5eb05f71e86469a14c/images/march6pic1.png" />
-  
+  ![Picture of Fred mk2 case](/images/march6pic1.png)
 </details>
 
 ---
