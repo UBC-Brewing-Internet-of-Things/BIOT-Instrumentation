@@ -10,6 +10,8 @@ char * url = "192.168.50.67:3001";
 // char * url = "192.168.1.139:3001";
 char * endpoint = "";
 
+char * PH_TEMP = "PH TEMP";
+char * PH = "CO2";
 
 extern "C" {
     void app_main();
@@ -32,7 +34,7 @@ void app_main() {
     wifi_init_sta();
 
     // // Init Data Device
-    DataDevice * dataDevice = new DataDevice(url, endpoint, "Bob");
+    DataDevice * dataDevice = new DataDevice(url, endpoint, "Bob", "PH TEMP");
     ESP_LOGI(TAG, "DataDevice created with url: %s, endpoint: %s, deviceName: %s", url, endpoint, "test device");
 
     // wait for everything to connect

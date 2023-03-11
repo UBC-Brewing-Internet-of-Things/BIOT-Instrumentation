@@ -113,7 +113,7 @@ void esp_WebSocket::Message_Received(char * message, int length) {
             response["event"] = "register_data_device";
             response["id"] = id;
             response["name"] = dd->getName();
-            response["type"] = "esp32";
+            response["type"] = dd->getType(); 
 
             char buffer[200];
             serializeJson(response, buffer);

@@ -20,17 +20,25 @@ class DeviceManager {
 		}
 
 		this.DataDevices.push(device);
+		
+		let data= {};
+		if (type === "PH TEMP") {
+			data = {
+				temperature: 0,
+				pH: 0
+			};
+		} else if (type === "CO2") {
+			data = {
+				CO2: 0
+			}
+		}
+		
 		const new_client = {
 			event: "new_device",
 			id: id,
 			name: name,
 			type: type,
-			data:
-			{
-				temperature: 0,
-				pH: 0,
-				dissolved_o2: 0
-			}
+			data: data
 		};
 		console.log("New device added: " + JSON.stringify(new_client));
 		this.broadcastToWebClients(JSON.stringify(new_client));
@@ -101,7 +109,7 @@ class DeviceManager {
 		const device = this.getDataDevice(id); 
 		if (device !== undefined) {
 			console.log("Dispatching update to local device state: " + id);
-			device.updateData(data.temperature, data.pH, data.dissolved_o2);
+			device.updateData(data);
 		}
 		this.broadcastToWebClients(JSON.stringify({
 			event: "device_update",
@@ -118,11 +126,7 @@ class DeviceManager {
 				id: device.id,
 				name: device.name,
 				type: device.type,
-				data: {
-					temperature: device.data.temperature,
-					pH: device.data.pH,
-					dissolved_o2: device.data.dissolved_o2
-				},
+				data: device.data,
 				recording: device.recording
 			});
 		});
@@ -144,11 +148,7 @@ class DeviceManager {
 				id: device.id,
 				name: device.name,
 				type: device.type,
-				data: {
-					temperature: device.data.temperature,
-					pH: device.data.pH,
-					dissolved_o2: device.data.dissolved_o2
-				},
+				data: device.data,
 				recording: device.recording
 			}
 			devices.push(device_info);

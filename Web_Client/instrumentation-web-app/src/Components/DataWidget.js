@@ -14,6 +14,7 @@ const min_max = {
 	"pH": [0, 14],
 	"temperature": [0, 100],
 	"dissolved_o2": [0, 100],
+	"CO2": [0, 100],
 }
 
 

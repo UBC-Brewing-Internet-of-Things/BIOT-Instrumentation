@@ -6,14 +6,16 @@
 
 class DataDevice {
 	public:
-	DataDevice(char * url, char * endpoint, char * name);
-	DataDevice(char * url, char * endpoint, int port, char * name);
+	DataDevice(char * url, char * endpoint, char * name, char * type);
+	DataDevice(char * url, char * endpoint, int port, char * name, char * type);
 	~DataDevice();
 	void readAndSendData();
 	void setId(const char * id);
 	char * getId();
 	void setName(char * name);
 	char * getName();
+	char * getType();
+	void setType(char * type);
 	
 
 	private:
@@ -21,5 +23,6 @@ class DataDevice {
 	char id[37];
 	char * name;
 	esp_DataReader * dr;
+	char * type;
 
 };

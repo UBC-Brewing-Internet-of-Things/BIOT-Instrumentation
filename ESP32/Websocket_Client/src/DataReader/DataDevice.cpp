@@ -5,19 +5,21 @@
 #define TAG "DataDevice"
 
 // Data Device class constructors
-DataDevice::DataDevice(char * url, char * endpoint, char * name) {
+DataDevice::DataDevice(char * url, char * endpoint, char * name, char * type) {
 	memset(this->id, 0, 37);
-	ws = new esp_WebSocket(url, endpoint, (void *) this);
 	this->name = name;
-	dr = new esp_DataReader();
+	this->type = type;
+	ws = new esp_WebSocket(url, endpoint, (void *) this);
+	dr = new esp_DataReader(type);
 }
 
-DataDevice::DataDevice(char * url, char * endpoint, int port, char * name) {
+DataDevice::DataDevice(char * url, char * endpoint, int port, char * name, char * type) {
 	// initialize id to all 0's (36 characters + 1 for null terminator)
 	memset(this->id, 0, 37);
-	ws = new esp_WebSocket(url, endpoint, port, (void *) this);
 	this->name = name;
-	dr = new esp_DataReader();
+	this->type = type;
+	ws = new esp_WebSocket(url, endpoint, port, (void *) this);
+	dr = new esp_DataReader(type);
 }
 
 DataDevice::~DataDevice() {

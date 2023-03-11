@@ -5,20 +5,31 @@ var fs = require('fs');
 class DataDevice extends Client {
 	constructor(id, name, type, socket, parent) {
 		super(id, name, type, socket, parent);
-		this.data = {
-			temperature: 0,
-			pH: 0,
-			dissolved_o2: 0
-		};
+		
+		if (this.type === "PH TEMP") {
+			this.data = {
+				temperature: 0,
+				pH: 0
+			};
+		} else if (this.type === "CO2") {
+			this.data = {
+				CO2: 0
+			}
+		}
+		
 		this.recordingInterval = null;
 		this.recordingResolution = 30000; // 30 seconds
 		this.recording = false;
 	}	
 
-	updateData(temp, pH, dissolved_o2) {
-		this.data.temperature = temp || 0;
-		this.data.pH = pH || 0;
-		this.data.dissolved_o2 = dissolved_o2 || 0;
+	updateData(update) {
+		if (this.type === "PH TEMP") {
+			this.data.temperature = update.temperature || 0;
+			this.data.pH = update.pH || 0;
+		} else if (this.type === "CO2") {
+			this.data.CO2 = update.CO2 || 0;
+		}
+	
 	}
 
 	startRecording() {
@@ -33,12 +44,19 @@ class DataDevice extends Client {
 		this.device_manager.addRecordingDevice(this.name, this);
 
 		this.recordingInterval = setInterval(() => {
-		    var data_to_write = {
+		 var data_to_write = {}; 
+			if (this.type === "PH TEMP") {
+			data_to_write = {
 				time: Date.now(),
 				temperature: this.data.temperature,
-				pH: this.data.pH,
-				dissolved_o2: this.data.dissolved_o2
+				pH: this.data.pH
 			};
+		  } else if (this.type === "CO2") {
+			data_to_write = {
+				time: Date.now(),
+				CO2: this.data.CO2
+			};
+		  }
 
 			DataWriter_v.writeData(data_to_write);
 		}, this.recordingResolution);

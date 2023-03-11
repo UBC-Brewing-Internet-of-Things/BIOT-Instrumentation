@@ -16,7 +16,7 @@
 
 class esp_DataReader {
 	public:
-	esp_DataReader();
+	esp_DataReader(char * type);
 	~esp_DataReader();
 	void loop();
 	void readData(StaticJsonDocument<200> & doc, char * id);
@@ -24,6 +24,7 @@ class esp_DataReader {
 	uart_config_t uart_config;
 
 	private:
+	char * type;
 	int numSensors;
 	EzoSensor ** sensors;
 	EzoSensor * ph;

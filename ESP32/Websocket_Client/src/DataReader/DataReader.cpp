@@ -47,8 +47,9 @@ void i2c_master_init() {
 // Class Constructor
 // Initialize the i2c bus
 // TODO: add other sensors
-esp_DataReader::esp_DataReader() {
+esp_DataReader::esp_DataReader(char * type) {
 	// Init i2c 
+	this->type = type;
 	i2c_master_init();
 }
 
@@ -62,20 +63,24 @@ void esp_DataReader::readData(StaticJsonDocument<200> & doc, char * id) {
 	uint8_t data_ph[10] = {0};
 	uint8_t data_dissolved_o2[10] = {0};
 
-	// Read temperature
-	ESP_LOGI(TAG, "Reading temp");
-	ESP_ERROR_CHECK_WITHOUT_ABORT(i2c_master_write_to_device(I2C_NUM_0, RTD_ADDR, data, 1, TIMEOUT));
-	vTaskDelay(DO_PROCESSING_DELAY);
-	ESP_ERROR_CHECK_WITHOUT_ABORT(i2c_master_read_from_device(I2C_NUM_0, RTD_ADDR, data_temp, 10, TIMEOUT));
-	ESP_LOGI(TAG, "temp: %s", data_temp);
-	
+	if (type == "PH TEMP")
+	{
+		// Read temperature
+		ESP_LOGI(TAG, "Reading temp");
+		ESP_ERROR_CHECK_WITHOUT_ABORT(i2c_master_write_to_device(I2C_NUM_0, RTD_ADDR, data, 1, TIMEOUT));
+		vTaskDelay(DO_PROCESSING_DELAY);
+		ESP_ERROR_CHECK_WITHOUT_ABORT(i2c_master_read_from_device(I2C_NUM_0, RTD_ADDR, data_temp, 10, TIMEOUT));
+		ESP_LOGI(TAG, "temp: %s", data_temp);
 
-	// Read pH
-	ESP_LOGI(TAG, "Reading pH");
-	ESP_ERROR_CHECK_WITHOUT_ABORT(i2c_master_write_to_device(I2C_NUM_0, PH_ADDR_TEMP, data, 1, TIMEOUT));
-	vTaskDelay(PH_PROCESSING_DELAY);
-	ESP_ERROR_CHECK_WITHOUT_ABORT(i2c_master_read_from_device(I2C_NUM_0, PH_ADDR_TEMP, data_ph, 10, TIMEOUT));
-	ESP_LOGI(TAG, "pH: %s", data_ph);
+		// Read pH
+		ESP_LOGI(TAG, "Reading pH");
+		ESP_ERROR_CHECK_WITHOUT_ABORT(i2c_master_write_to_device(I2C_NUM_0, PH_ADDR_TEMP, data, 1, TIMEOUT));
+		vTaskDelay(PH_PROCESSING_DELAY);
+		ESP_ERROR_CHECK_WITHOUT_ABORT(i2c_master_read_from_device(I2C_NUM_0, PH_ADDR_TEMP, data_ph, 10, TIMEOUT));
+		ESP_LOGI(TAG, "pH: %s", data_ph);
+	} else if (type == "CO2") {
+		// ...
+	}
 
 	// // Read dissolved_o2
 	// ESP_LOGI(TAG, "Reading dissolved_o2");
