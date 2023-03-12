@@ -13,9 +13,9 @@
   - Printed and assembled Fred Mach 2 case.
   - Researched new database solutions.
   - Researched how to convert the bluetooth signal to wifi from the Tilt Hydrometer.
- <img src="/images/march6pic1.png" width="40%" alt="CAD image of Fred Mach 2 Case" />
- <img src="/images/march12pic1.png" width="40%" alt="Picture of Fred Mach 2 Case with the cover closed" />
- <img src="/images/march12pic2.png" width="40%" alt="Picture of Fred Mach 2 Case with the cover open" />
+ <img src="/images/march6pic1.png" width="30%" alt="CAD image of Fred Mach 2 Case" />
+ <img src="/images/march12pic1.jpg" width="30%" alt="Picture of Fred Mach 2 Case with the cover closed" />
+ <img src="/images/march12pic2.jpg" width="30%" alt="Picture of Fred Mach 2 Case with the cover open" />
 </details>
 
 ---
