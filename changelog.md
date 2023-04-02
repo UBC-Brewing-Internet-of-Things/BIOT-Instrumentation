@@ -8,7 +8,7 @@
   <summary>March 27th 2023 - April 2nd 2023</summary>
  
   - Allowed the two Pis, being the Webserver and Screen, to be accessible from DWService.
- <img src="/images/april2pic1.png" width="30%" alt="Image of Agents in DWService" />
+ <img src="/images/april2pic1.png" width="60%" alt="Image of Agents in DWService" />
 </details>
  
 ---
