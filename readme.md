@@ -1,3 +1,8 @@
+# Important Note
+*This repository is now archived. Each folder (Server, Web_Client, ESP32) has been separated into their respective repositories, which can be found under the organization's repository list.*
+
+---
+
 # General Information
 ![Web Client UI](UpdatedScreenshot.png "UI image")
 
